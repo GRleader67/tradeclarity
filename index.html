@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TradeClarity</title>
-
+<button onclick="testSave()">Test Firebase</button>
 <style>
 :root{
 --bg:#0b0f14;
@@ -750,7 +750,21 @@ const firebaseConfig = {
   messagingSenderId: "177897129823",
   appId: "1:177897129823:web:b99ef169cecbe5473558ea"
 };
+  
+window.testSave = async function () {
+  try {
+    await addDoc(collection(db, "test"), {
+      message: "George test " + new Date().toLocaleTimeString(),
+      time: new Date()
+    });
 
+    alert("Saved to Firebase!");
+  } catch (err) {
+    alert("Error saving");
+    console.error(err);
+  }
+};
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
