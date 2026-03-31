@@ -4,25 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TradeClarity</title>
-<button onclick="testSave()">Test Firebase</button>
-<style>
-:root{
---bg:#0b0f14;
---card:#11161d;
---text:#e6edf3;
---primary:#3b82f6;
---accent:#22c55e;
---danger:#ef4444;
---border:#222a33;
-}
 
-body{
-margin:0;
-font-family:Arial;
-background:var(--bg);
-color:var(--text);
-padding:20px;
+<style>
+:root {
+  --bg:#0b0f14;
+  --card:#11161d;
+  --text:#e6edf3;
+  --primary:#3b82f6;
+  --accent:#22c55e;
+  --danger:#ef4444;
+  --border:#222a33;
 }
+</style>
+
+<body>
+
+<button onclick="testSave()" style="margin:20px; padding:10px;">
+  Test Firebase
+</button>
 
 .tabs{
 display:flex;
@@ -739,18 +738,21 @@ render();
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
+// Firebase config (your real one)
 const firebaseConfig = {
-  apiKey: "AIzaSyBGxTOJXxuVgke3l_Vl6bQqubW7CuHgVE",
-  authDomain: "tradeclarity-ad869.firebaseapp.com",
-  projectId: "tradeclarity-ad869",
-  storageBucket: "tradeclarity-ad869.firebasestorage.app",
-  messagingSenderId: "177897129823",
-  appId: "1:177897129823:web:b99ef169cecbe5473558ea"
+  apiKey: "YOUR REAL KEY",
+  authDomain: "YOUR DOMAIN",
+  projectId: "YOUR PROJECT",
+  storageBucket: "YOUR BUCKET",
+  messagingSenderId: "YOUR ID",
+  appId: "YOUR APP ID"
 };
-  
+
+// Init Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// GLOBAL FUNCTION (IMPORTANT)
 window.testSave = async function () {
   try {
     await addDoc(collection(db, "test"), {
@@ -764,18 +766,8 @@ window.testSave = async function () {
     console.error(err);
   }
 };
-  
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-async function testSave() {
-  await addDoc(collection(db, "test"), {
-    message: "Firebase connected",
-    time: new Date()
-  });
-  console.log("Saved to Firebase!");
-}
 </script>
 
-</body>
+ </body>
 </html>
