@@ -743,12 +743,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR KEY",
-  authDomain: "YOUR DOMAIN",
-  projectId: "YOUR PROJECT",
-  storageBucket: "YOUR BUCKET",
-  messagingSenderId: "YOUR ID",
-  appId: "YOUR APP ID"
+  apiKey: "AIzaSyBGxTOJXxuVgke3l_Vl6bQqubW7CuHgVE",
+  authDomain: "tradeclarity-ad869.firebaseapp.com",
+  projectId: "tradeclarity-ad869",
+  storageBucket: "tradeclarity-ad869.firebasestorage.app",
+  messagingSenderId: "177897129823",
+  appId: "1:177897129823:web:b99ef169cecbe5473558ea"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -761,15 +761,6 @@ async function testSave() {
   });
   console.log("Saved to Firebase!");
 }
-
-window.testSave = async function () {
-  await addDoc(collection(db, "test"), {
-    message: "Firebase connected",
-    time: new Date()
-  });
-  console.log("Saved to Firebase!");
-};
-
 </script>
 
 </body>
