@@ -47,15 +47,11 @@ body{
   margin-bottom:20px;
 }
 
-.form-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:15px;
-}
+.hidden{display:none}
 
 input,select{
   padding:8px;
+  margin:5px;
   border-radius:6px;
   border:1px solid var(--border);
   background:#0e131a;
@@ -74,6 +70,7 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
+  margin-top:10px;
 }
 
 th,td{
@@ -84,7 +81,6 @@ th,td{
 
 .green{color:var(--accent)}
 .red{color:var(--danger)}
-.hidden{display:none}
 
 .dashboard{
   display:grid;
@@ -98,17 +94,14 @@ th,td{
   padding:15px;
   border-radius:10px;
   text-align:center;
-  border:1px solid var(--border);
 }
 </style>
 </head>
 
 <body>
 
-<h2>TradeClarity Pro (Full System)</h2>
-<button onclick="testFirebase()">Test Firebase</button>
+<h2>TradeClarity Pro</h2>
 
-<!-- DASHBOARD -->
 <div class="dashboard">
   <div class="dash-card"><h4>Total Value</h4><p id="totalValue">$0</p></div>
   <div class="dash-card"><h4>Total P/L</h4><p id="totalPL">$0</p></div>
@@ -116,63 +109,19 @@ th,td{
   <div class="dash-card"><h4>Staking Rewards</h4><p id="stakingRewards">0</p></div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
-<button onclick="showTab('stocks')" class="active" id="tab-stocks">Stocks</button>
-<button onclick="showTab('crypto')" id="tab-crypto">Crypto</button>
-<button onclick="showTab('staking')" id="tab-staking">Staking</button>
-<button onclick="showTab('options')" id="tab-options">Options</button>
-<button onclick="showTab('journal')" id="tab-journal">Journal</button>
+<button id="tab-stocks">Stocks</button>
+<button id="tab-crypto">Crypto</button>
+<button id="tab-staking">Staking</button>
+<button id="tab-options">Options</button>
+<button id="tab-journal">Journal</button>
 </div>
 
-<!-- STOCKS -->
-<div id="stocksPage" class="card">
-<input id="s_ticker" placeholder="Ticker">
-<input id="s_shares" type="number" placeholder="Shares">
-<input id="s_avg" type="number" placeholder="Avg">
-<input id="s_price" type="number" placeholder="Price">
-<button onclick="addStock()">Save</button>
-<table id="stocksTable"></table>
-</div>
-
-<!-- CRYPTO -->
-<div id="cryptoPage" class="card hidden">
-<input id="c_coin" placeholder="Coin">
-<input id="c_amount" type="number" placeholder="Amount">
-<input id="c_avg" type="number" placeholder="Avg">
-<input id="c_price" type="number" placeholder="Price">
-<button onclick="addCrypto()">Save</button>
-<table id="cryptoTable"></table>
-</div>
-
-<!-- STAKING -->
-<div id="stakingPage" class="card hidden">
-<input id="st_coin" placeholder="Coin">
-<input id="st_amount" type="number" placeholder="Amount">
-<input id="st_apy" type="number" placeholder="APY">
-<button onclick="addStaking()">Save</button>
-<table id="stakingTable"></table>
-</div>
-
-<!-- OPTIONS -->
-<div id="optionsPage" class="card hidden">
-<input id="o_ticker" placeholder="Ticker">
-<select id="o_type"><option>Call</option><option>Put</option></select>
-<input id="o_contracts" type="number" placeholder="Contracts">
-<input id="o_entry" type="number" placeholder="Entry">
-<input id="o_price" type="number" placeholder="Price">
-<button onclick="addOption()">Save</button>
-<table id="optionsTable"></table>
-</div>
-
-<!-- JOURNAL -->
-<div id="journalPage" class="card hidden">
-<input id="j_ticker" placeholder="Ticker">
-<select id="j_result"><option>Win</option><option>Loss</option></select>
-<input id="j_notes" placeholder="Notes">
-<button onclick="addJournal()">Save</button>
-<table id="journalTable"></table>
-</div>
+<div id="stocksPage" class="card"></div>
+<div id="cryptoPage" class="card hidden"></div>
+<div id="stakingPage" class="card hidden"></div>
+<div id="optionsPage" class="card hidden"></div>
+<div id="journalPage" class="card hidden"></div>
 
 <script type="module">
 
@@ -183,10 +132,7 @@ from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 const firebaseConfig = { 
   apiKey: "AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
   authDomain: "tradeclarity-ad869.firebaseapp.com",
-  projectId: "tradeclarity-ad869",
-  storageBucket: "tradeclarity-ad869.firebasestorage.app",
-  messagingSenderId: "177897129823",
-  appId: "1:177897129823:web:b99ef169cecbe5473558ea"
+  projectId: "tradeclarity-ad869"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -195,22 +141,55 @@ const db = getFirestore(app);
 /* DATA */
 let stocks=[], crypto=[], staking=[], options=[], journal=[];
 
-/* TAB */
-window.showTab = function(tab){
-["stocks","crypto","staking","options","journal"].forEach(t=>{
-document.getElementById(t+"Page").classList.add("hidden");
-document.getElementById("tab-"+t).classList.remove("active");
-});
-document.getElementById(tab+"Page").classList.remove("hidden");
-document.getElementById("tab-"+tab).classList.add("active");
-};
+/* TAB SYSTEM */
+const tabs=["stocks","crypto","staking","options","journal"];
 
-/* ADD */
-window.addStock=async()=>save("stocks",{ticker:s_ticker.value.toUpperCase(),shares:+s_shares.value,avg:+s_avg.value,price:+s_price.value});
-window.addCrypto=async()=>save("crypto",{coin:c_coin.value.toUpperCase(),amount:+c_amount.value,avg:+c_avg.value,price:+c_price.value});
-window.addStaking=async()=>save("staking",{coin:st_coin.value.toUpperCase(),amount:+st_amount.value,apy:+st_apy.value});
-window.addOption=async()=>save("options",{ticker:o_ticker.value,type:o_type.value,contracts:+o_contracts.value,entry:+o_entry.value,price:+o_price.value});
-window.addJournal=async()=>save("journal",{ticker:j_ticker.value,result:j_result.value,notes:j_notes.value});
+tabs.forEach(t=>{
+document.getElementById("tab-"+t).onclick=()=>{
+tabs.forEach(x=>{
+document.getElementById(x+"Page").classList.add("hidden");
+document.getElementById("tab-"+x).classList.remove("active");
+});
+document.getElementById(t+"Page").classList.remove("hidden");
+document.getElementById("tab-"+t).classList.add("active");
+};
+});
+
+/* BUILD UI */
+function buildForms(){
+
+stocksPage.innerHTML=`
+<input id="s_ticker"><input id="s_shares"><input id="s_avg"><input id="s_price">
+<button onclick="addStock()">Save</button>
+<table id="stocksTable"></table>`;
+
+cryptoPage.innerHTML=`
+<input id="c_coin"><input id="c_amount"><input id="c_avg"><input id="c_price">
+<button onclick="addCrypto()">Save</button>
+<table id="cryptoTable"></table>`;
+
+stakingPage.innerHTML=`
+<input id="st_coin"><input id="st_amount"><input id="st_apy">
+<button onclick="addStaking()">Save</button>
+<table id="stakingTable"></table>`;
+
+optionsPage.innerHTML=`
+<input id="o_ticker"><input id="o_contracts"><input id="o_entry"><input id="o_price">
+<button onclick="addOption()">Save</button>
+<table id="optionsTable"></table>`;
+
+journalPage.innerHTML=`
+<input id="j_ticker"><select id="j_result"><option>Win</option><option>Loss</option></select>
+<button onclick="addJournal()">Save</button>
+<table id="journalTable"></table>`;
+}
+
+/* ADD FUNCTIONS */
+window.addStock=()=>save("stocks",{ticker:s_ticker.value,shares:+s_shares.value,avg:+s_avg.value,price:+s_price.value});
+window.addCrypto=()=>save("crypto",{coin:c_coin.value,amount:+c_amount.value,avg:+c_avg.value,price:+c_price.value});
+window.addStaking=()=>save("staking",{coin:st_coin.value,amount:+st_amount.value,apy:+st_apy.value});
+window.addOption=()=>save("options",{ticker:o_ticker.value,contracts:+o_contracts.value,entry:+o_entry.value,price:+o_price.value});
+window.addJournal=()=>save("journal",{ticker:j_ticker.value,result:j_result.value});
 
 /* SAVE */
 async function save(col,data){
@@ -221,7 +200,7 @@ render();
 }
 
 /* LOAD */
-async function loadAll(){
+async function load(){
 stocks=(await getDocs(collection(db,"stocks"))).docs.map(d=>({...d.data(),id:d.id}));
 crypto=(await getDocs(collection(db,"crypto"))).docs.map(d=>({...d.data(),id:d.id}));
 staking=(await getDocs(collection(db,"staking"))).docs.map(d=>({...d.data(),id:d.id}));
@@ -231,10 +210,7 @@ render();
 }
 
 /* DELETE */
-window.del=async(col,id)=>{
-await deleteDoc(doc(db,col,id));
-loadAll();
-};
+window.del=(col,id)=>{deleteDoc(doc(db,col,id));load();};
 
 /* RENDER */
 function render(){
@@ -281,13 +257,11 @@ let winRate=journal.length?((wins/journal.length)*100).toFixed(0):0;
 totalValue.innerText="$"+total.toFixed(2);
 totalPL.innerText="$"+pl.toFixed(2);
 stakingRewards.innerText=stake.toFixed(4);
-winRateEl.innerText=winRate+"%";
+winRate.innerText=winRate+"%";
 }
 
-/* TEST */
-window.testFirebase=async()=>{await addDoc(collection(db,"test"),{ok:true});alert("Connected");};
-
-loadAll();
+buildForms();
+load();
 
 </script>
 
