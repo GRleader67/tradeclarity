@@ -6,22 +6,23 @@
 <title>TradeClarity</title>
 
 <style>
-:root {
-  --bg:#0b0f14;
-  --card:#11161d;
-  --text:#e6edf3;
-  --primary:#3b82f6;
-  --accent:#22c55e;
-  --danger:#ef4444;
-  --border:#222a33;
+:root{
+--bg:#0b0f14;
+--card:#11161d;
+--text:#e6edf3;
+--primary:#3b82f6;
+--accent:#22c55e;
+--danger:#ef4444;
+--border:#222a33;
 }
-</style>
 
-<body>
-
-<button onclick="testSave()" style="margin:20px; padding:10px;">
-  Test Firebase
-</button>
+body{
+margin:0;
+font-family:Arial;
+background:var(--bg);
+color:var(--text);
+padding:20px;
+}
 
 .tabs{
 display:flex;
@@ -120,10 +121,13 @@ font-weight:bold;
 
 <body>
 
+<button onclick="testSave()" style="margin-bottom:20px;">
+  Test Firebase
+</button>
+
 <h2>TradeClarity</h2>
 
 <div class="dashboard">
-
   <div class="dash-card">
     <h4>Total Value</h4>
     <p id="totalValue">$0</p>
@@ -280,12 +284,19 @@ if(page==="cryptoPage" && document.activeElement.id==="sCoin") handleStaking();
 function handleStock(){
 
 const data = {
-ticker: ticker.value.toUpperCase(),
-shares: +shares.value,
-avg: +avg.value,
-price: +price.value
+  ticker: ticker.value.toUpperCase(),
+  shares: +shares.value,
+  avg: +avg.value,
+  price: +price.value
 };
 
+addDoc(collection(window.db, "stocks"), {
+  ticker: data.ticker,
+  shares: data.shares,
+  avg: data.avg,
+  price: data.price,
+  created: new Date()
+});
 if(appState.mode === "edit"){
 stocksData[appState.editIndex] = data;
 }else{
@@ -738,36 +749,35 @@ render();
 
 <script type="module">
 
-// Firebase config (your real one)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
 const firebaseConfig = {
-  apiKey: "YOUR REAL KEY",
-  authDomain: "YOUR DOMAIN",
-  projectId: "YOUR PROJECT",
-  storageBucket: "YOUR BUCKET",
-  messagingSenderId: "YOUR ID",
-  appId: "YOUR APP ID"
+  apiKey: "AIzaSy...",
+  authDomain: "tradeclarity-ad869.firebaseapp.com",
+  projectId: "tradeclarity-ad869",
+  storageBucket: "tradeclarity-ad869.appspot.com",
+  messagingSenderId: "17897129823",
+  appId: "1:17897129823:web:..."
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+window.db = getFirestore(app);
 
-// GLOBAL FUNCTION (IMPORTANT)
 window.testSave = async function () {
   try {
-    await addDoc(collection(db, "test"), {
+    await addDoc(collection(window.db, "test"), {
       message: "George test " + new Date().toLocaleTimeString(),
       time: new Date()
     });
 
-    alert("Saved to Firebase!");
+    alert("✅ Saved to Firebase!");
+    console.log("Saved!");
   } catch (err) {
-    alert("Error saving");
+    alert("❌ Error saving");
     console.error(err);
   }
-};
+};</script>
 
-</script>
-
- </body>
+</body>
 </html>
