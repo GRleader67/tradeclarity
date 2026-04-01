@@ -539,66 +539,20 @@ appState.mode = "add";
 appState.editIndex = null;
 }
 
-/* ===== FIREBASE ===== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc }
-from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-const app = initializeApp({
-  apiKey:"AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
-  authDomain:"tradeclarity-ad869.firebaseapp.com",
-  projectId:"tradeclarity-ad869"
-});
-const db = getFirestore(app);
-
-/* ===== SAVE (NON-DESTRUCTIVE) ===== */
-async function saveData(){
-
-  try{
-
-    // clear and rewrite collections (simple + stable approach)
-
-    for(const s of stocksData){
-      await addDoc(collection(db,"stocks"), s);
-    }
-
-    for(const c of cryptoData){
-      await addDoc(collection(db,"crypto"), c);
-    }
-
-    for(const o of optionsData){
-      await addDoc(collection(db,"options"), o);
-    }
-
-    for(const j of journalData){
-      await addDoc(collection(db,"journal"), j);
-    }
-
-    for(const s of stakingData){
-      await addDoc(collection(db,"staking"), s);
-    }
-
-  }catch(e){
-    console.error(e);
-    alert("Firebase save failed");
-  }
+function saveData(){
+localStorage.setItem("stocksData", JSON.stringify(stocksData));
+localStorage.setItem("cryptoData", JSON.stringify(cryptoData));
+localStorage.setItem("optionsData", JSON.stringify(optionsData));
+localStorage.setItem("journalData", JSON.stringify(journalData));
+localStorage.setItem("stakingData", JSON.stringify(stakingData));
 }
 
-/* ===== LOAD ===== */
-async function loadData(){
-
-  try{
-
-    stocksData = (await getDocs(collection(db,"stocks"))).docs.map(d=>d.data());
-    cryptoData = (await getDocs(collection(db,"crypto"))).docs.map(d=>d.data());
-    optionsData = (await getDocs(collection(db,"options"))).docs.map(d=>d.data());
-    journalData = (await getDocs(collection(db,"journal"))).docs.map(d=>d.data());
-    stakingData = (await getDocs(collection(db,"staking"))).docs.map(d=>d.data());
-
-  }catch(e){
-    console.error(e);
-  }
-
+function loadData(){
+stocksData = JSON.parse(localStorage.getItem("stocksData")) || [];
+cryptoData = JSON.parse(localStorage.getItem("cryptoData")) || [];
+optionsData = JSON.parse(localStorage.getItem("optionsData")) || [];
+journalData = JSON.parse(localStorage.getItem("journalData")) || [];
+stakingData = JSON.parse(localStorage.getItem("stakingData")) || [];
 }
 
 /* ===== RENDER ===== */
@@ -779,10 +733,8 @@ stakingRewardsEl.innerText = stakingRewards.toFixed(4);
 
 }
 
-(async () => {
-  await loadData();
-  render();
-})();
+loadData();
+render();
 </script>
 
 </body>
