@@ -241,20 +241,6 @@ async function loadData(){
 
 }  
   
-function startRealtimeSync(){
-
-  onSnapshot(doc(db,"app","data"), (snap)=>{
-
-    if(snap.exists()){
-      let d = snap.data();
-
-      stocksData = d.stocksData || [];
-      cryptoData = d.cryptoData || [];
-      optionsData = d.optionsData || [];
-      journalData = d.journalData || [];
-      stakingData = d.stakingData || [];
-    }
-
     render();
 
   });
