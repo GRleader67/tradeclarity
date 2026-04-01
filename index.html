@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TradeClarity</title>
+<title>TradeClarity Pro</title>
 
 <style>
 :root{
@@ -50,19 +50,13 @@ border-radius:12px;
 margin-bottom:20px;
 }
 
-.form-row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:15px;
-}
-
 input,select{
 padding:8px;
 border-radius:6px;
 border:1px solid var(--border);
 background:#0e131a;
 color:white;
+margin:5px;
 }
 
 button{
@@ -87,9 +81,8 @@ text-align:center;
 
 .green{color:var(--accent)}
 .red{color:var(--danger)}
-
 .hidden{display:none}
-/* DASHBOARD */
+
 .dashboard{
 display:grid;
 grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
@@ -102,363 +95,195 @@ background:var(--card);
 padding:15px;
 border-radius:10px;
 text-align:center;
-border:1px solid var(--border);
-}
-
-.dash-card h4{
-margin:0 0 5px 0;
-font-size:14px;
-color:#9aa4af;
-}
-
-.dash-card p{
-margin:0;
-font-size:20px;
-font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<h2>TradeClarity</h2>
+<h2>TradeClarity Pro</h2>
 
 <div class="dashboard">
-
-  <div class="dash-card">
-    <h4>Total Value</h4>
-    <p id="totalValue">$0</p>
-  </div>
-
-  <div class="dash-card">
-    <h4>Total P/L</h4>
-    <p id="totalPL">$0</p>
-  </div>
-
-  <div class="dash-card">
-    <h4>Win Rate</h4>
-    <p id="winRate">0%</p>
-  </div>
-
-  <div class="dash-card">
-    <h4>Staking Rewards</h4>
-    <p id="stakingRewards">0</p>
-  </div>
-
+<div class="dash-card"><h4>Total Value</h4><p id="totalValue">$0</p></div>
+<div class="dash-card"><h4>Total P/L</h4><p id="totalPL">$0</p></div>
+<div class="dash-card"><h4>Win Rate</h4><p id="winRate">0%</p></div>
+<div class="dash-card"><h4>Staking Rewards</h4><p id="stakingRewards">0</p></div>
 </div>
 
 <div class="tabs">
-<button onclick="showTab('stocks')" id="tab-stocks" class="active">Stocks</button>
-<button onclick="showTab('crypto')" id="tab-crypto">Crypto</button>
-<button onclick="showTab('options')" id="tab-options">Options</button>
-<button onclick="showTab('journal')" id="tab-journal">Journal</button>
+<button id="tab-stocks">Stocks</button>
+<button id="tab-crypto">Crypto</button>
+<button id="tab-options">Options</button>
+<button id="tab-journal">Journal</button>
 </div>
 
-<!-- STOCKS -->
 <div id="stocksPage" class="card">
-<h3>Stocks</h3>
-
-<div class="form-row">
 <input id="ticker" placeholder="Ticker">
 <input id="shares" type="number" placeholder="Shares">
-<input id="avg" type="number" placeholder="Avg Price">
-<input id="price" type="number" placeholder="Current Price">
-<button onclick="handleStock()">Save</button>
-</div>
-
+<input id="avg" type="number" placeholder="Avg">
+<input id="price" type="number" placeholder="Price">
+<button id="saveStock">Save</button>
 <table id="stocks"></table>
 </div>
 
-<!-- CRYPTO -->
 <div id="cryptoPage" class="card hidden">
-<h3>Crypto</h3>
-
-<div class="form-row">
-<input id="cTicker" placeholder="Coin">
-<input id="cAmount" type="number" placeholder="Amount">
-<input id="cAvg" type="number" placeholder="Avg Price">
-<input id="cPrice" type="number" placeholder="Current Price">
-<button onclick="handleCrypto()">Save</button>
-</div>
-
-<table id="cryptoTable"></table>
+<input id="cTicker"><input id="cAmount"><input id="cAvg"><input id="cPrice">
+<button id="saveCrypto">Save</button>
 
 <h4>Staking</h4>
+<input id="sCoin"><input id="sAmount"><input id="sApy">
+<button id="saveStaking">Save</button>
 
-<div class="form-row">
-<input id="sCoin" placeholder="Coin">
-<input id="sAmount" type="number" placeholder="Amount Staked">
-<input id="sApy" type="number" placeholder="APY %">
-<button onclick="handleStaking()">Save</button>
-</div>
-
+<table id="cryptoTable"></table>
 <table id="stakingTable"></table>
 </div>
 
-<!-- OPTIONS -->
 <div id="optionsPage" class="card hidden">
-<h3>Options</h3>
-
-<div class="form-row">
-<input id="oTicker" placeholder="Ticker">
-<select id="oType">
-<option>Call</option>
-<option>Put</option>
-</select>
-<input id="oContracts" type="number" placeholder="# Contracts">
-<input id="oEntry" type="number" placeholder="Entry Price">
-<input id="oPrice" type="number" placeholder="Current Price">
-<button onclick="handleOptions()">Save</button>
-</div>
-
+<input id="oTicker"><input id="oContracts"><input id="oEntry"><input id="oPrice">
+<button id="saveOptions">Save</button>
 <table id="optionsTable"></table>
 </div>
-<!-- JOURNAL -->
+
 <div id="journalPage" class="card hidden">
-<h3>Journal</h3>
-
-<div class="form-row">
-<input id="jTicker" placeholder="Ticker">
-<select id="jResult">
-<option>Win</option>
-<option>Loss</option>
-</select>
-<input id="jNotes" placeholder="Notes">
-<button onclick="handleJournal()">Save</button>
-</div>
-
+<input id="jTicker">
+<select id="jResult"><option>Win</option><option>Loss</option></select>
+<input id="jNotes">
+<button id="saveJournal">Save</button>
 <table id="journalTable"></table>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
+import { getFirestore, collection, addDoc, getDocs }
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-/* ================= FIREBASE ================= */
-const firebaseConfig = { 
-  apiKey: "AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
-  authDomain: "tradeclarity-ad869.firebaseapp.com",
-  projectId: "tradeclarity-ad869"
-};
-
-const app = initializeApp(firebaseConfig);
+/* FIREBASE */
+const app = initializeApp({
+apiKey:"AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
+authDomain:"tradeclarity-ad869.firebaseapp.com",
+projectId:"tradeclarity-ad869"
+});
 const db = getFirestore(app);
 
-/* ================= DOM ================= */
-const el = {
-  stocks: document.getElementById("stocks"),
-  crypto: document.getElementById("cryptoTable"),
-  options: document.getElementById("optionsTable"),
-  journal: document.getElementById("journalTable"),
-  staking: document.getElementById("stakingTable"),
+/* DOM */
+const $ = id => document.getElementById(id);
 
-  totalValue: document.getElementById("totalValue"),
-  totalPL: document.getElementById("totalPL"),
-  winRate: document.getElementById("winRate"),
-  stakingRewards: document.getElementById("stakingRewards"),
+/* DATA */
+let stocks=[],crypto=[],options=[],journal=[],staking=[];
 
-  ticker: document.getElementById("ticker"),
-  shares: document.getElementById("shares"),
-  avg: document.getElementById("avg"),
-  price: document.getElementById("price"),
+/* SAFE LOAD */
+async function load(col){
+try{
+const snap=await getDocs(collection(db,col));
+return snap.docs.map(d=>d.data());
+}catch(e){
+console.error(e);
+return [];
+}
+}
 
-  cTicker: document.getElementById("cTicker"),
-  cAmount: document.getElementById("cAmount"),
-  cAvg: document.getElementById("cAvg"),
-  cPrice: document.getElementById("cPrice"),
-
-  sCoin: document.getElementById("sCoin"),
-  sAmount: document.getElementById("sAmount"),
-  sApy: document.getElementById("sApy"),
-
-  oTicker: document.getElementById("oTicker"),
-  oType: document.getElementById("oType"),
-  oContracts: document.getElementById("oContracts"),
-  oEntry: document.getElementById("oEntry"),
-  oPrice: document.getElementById("oPrice"),
-
-  jTicker: document.getElementById("jTicker"),
-  jResult: document.getElementById("jResult"),
-  jNotes: document.getElementById("jNotes")
-};
-
-/* ================= DATA ================= */
-let stocksData = [];
-let cryptoData = [];
-let optionsData = [];
-let journalData = [];
-let stakingData = [];
-
-/* ================= LOAD ================= */
 async function loadAll(){
-  stocksData = await load("stocks");
-  cryptoData = await load("crypto");
-  optionsData = await load("options");
-  journalData = await load("journal");
-  stakingData = await load("staking");
-  render();
+stocks=await load("stocks");
+crypto=await load("crypto");
+options=await load("options");
+journal=await load("journal");
+staking=await load("staking");
+render();
 }
 
-async function load(name){
-  const snap = await getDocs(collection(db,name));
-  return snap.docs.map(d=>({...d.data(), id:d.id}));
-}
-
-/* ================= SAVE ================= */
+/* SAVE */
 async function save(col,data){
-  try{
-    await addDoc(collection(db,col),data);
-    await loadAll();
-  }catch(e){
-    console.error(e);
-    alert("Firebase error — check rules");
-  }
+try{
+await addDoc(collection(db,col),data);
+loadAll();
+}catch(e){
+alert("Firebase error → check rules");
+console.error(e);
+}
 }
 
-/* ================= DELETE ================= */
-window.deleteItem = async (col,id)=>{
-  await deleteDoc(doc(db,col,id));
-  loadAll();
+/* BUTTONS */
+$("saveStock").onclick=()=>save("stocks",{ticker:$("ticker").value,shares:+$("shares").value,avg:+$("avg").value,price:+$("price").value});
+$("saveCrypto").onclick=()=>save("crypto",{ticker:$("cTicker").value,amount:+$("cAmount").value,avg:+$("cAvg").value,price:+$("cPrice").value});
+$("saveOptions").onclick=()=>save("options",{ticker:$("oTicker").value,contracts:+$("oContracts").value,entry:+$("oEntry").value,price:+$("oPrice").value});
+$("saveJournal").onclick=()=>save("journal",{ticker:$("jTicker").value,result:$("jResult").value});
+$("saveStaking").onclick=()=>save("staking",{coin:$("sCoin").value,amount:+$("sAmount").value,apy:+$("sApy").value});
+
+/* TABS */
+const tabs=["stocks","crypto","options","journal"];
+tabs.forEach(t=>{
+$("tab-"+t).onclick=()=>{
+tabs.forEach(x=>{
+$(x+"Page").classList.add("hidden");
+$("tab-"+x).classList.remove("active");
+});
+$(t+"Page").classList.remove("hidden");
+$("tab-"+t).classList.add("active");
 };
-
-/* ================= HANDLERS ================= */
-window.handleStock = ()=>save("stocks",{
-  ticker: el.ticker.value.toUpperCase(),
-  shares:+el.shares.value,
-  avg:+el.avg.value,
-  price:+el.price.value
 });
 
-window.handleCrypto = ()=>save("crypto",{
-  ticker: el.cTicker.value.toUpperCase(),
-  amount:+el.cAmount.value,
-  avg:+el.cAvg.value,
-  price:+el.cPrice.value
-});
-
-window.handleOptions = ()=>save("options",{
-  ticker: el.oTicker.value.toUpperCase(),
-  type: el.oType.value,
-  contracts:+el.oContracts.value,
-  entry:+el.oEntry.value,
-  price:+el.oPrice.value
-});
-
-window.handleJournal = ()=>save("journal",{
-  ticker: el.jTicker.value.toUpperCase(),
-  result: el.jResult.value,
-  notes: el.jNotes.value
-});
-
-window.handleStaking = ()=>save("staking",{
-  coin: el.sCoin.value.toUpperCase(),
-  amount:+el.sAmount.value,
-  apy:+el.sApy.value
-});
-
-/* ================= RENDER ================= */
+/* RENDER */
 function render(){
 
+let total=0,pl=0,stake=0;
+
 /* STOCKS */
-el.stocks.innerHTML = `<tr>
-<th>Ticker</th><th>Shares</th><th>Value</th><th>P/L</th><th></th></tr>`;
-
-let total=0,pl=0;
-
-stocksData.forEach(s=>{
-let value=s.shares*s.price;
-let p=(s.price-s.avg)*s.shares;
-
-total+=value; pl+=p;
-
-el.stocks.innerHTML+=`
-<tr>
-<td>${s.ticker}</td>
-<td>${s.shares}</td>
-<td>$${value.toFixed(2)}</td>
-<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
-<td><button onclick="deleteItem('stocks','${s.id}')">X</button></td>
-</tr>`;
+$("stocks").innerHTML="<tr><th>Ticker</th><th>P/L</th></tr>";
+stocks.forEach(s=>{
+let shares=Number(s.shares)||0;
+let price=Number(s.price)||0;
+let avg=Number(s.avg)||0;
+let p=(price-avg)*shares;
+total+=shares*price; pl+=p;
+$("stocks").innerHTML+=`<tr><td>${s.ticker||"-"}</td><td class="${p>=0?'green':'red'}">${p.toFixed(2)}</td></tr>`;
 });
 
 /* CRYPTO */
-el.crypto.innerHTML = `<tr>
-<th>Coin</th><th>Value</th><th>P/L</th><th></th></tr>`;
-
-cryptoData.forEach(c=>{
-let value=c.amount*c.price;
-let p=(c.price-c.avg)*c.amount;
-
-total+=value; pl+=p;
-
-el.crypto.innerHTML+=`
-<tr>
-<td>${c.ticker}</td>
-<td>$${value.toFixed(2)}</td>
-<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
-<td><button onclick="deleteItem('crypto','${c.id}')">X</button></td>
-</tr>`;
+$("cryptoTable").innerHTML="<tr><th>Coin</th><th>P/L</th></tr>";
+crypto.forEach(c=>{
+let amt=Number(c.amount)||0;
+let price=Number(c.price)||0;
+let avg=Number(c.avg)||0;
+let p=(price-avg)*amt;
+total+=amt*price; pl+=p;
+$("cryptoTable").innerHTML+=`<tr><td>${c.ticker||"-"}</td><td>${p.toFixed(2)}</td></tr>`;
 });
 
 /* OPTIONS */
-el.options.innerHTML = `<tr>
-<th>Ticker</th><th>P/L</th><th></th></tr>`;
-
-optionsData.forEach(o=>{
-let p=(o.price-o.entry)*o.contracts*100;
-
-total+=o.contracts*100*o.price;
+$("optionsTable").innerHTML="<tr><th>Ticker</th><th>P/L</th></tr>";
+options.forEach(o=>{
+let contracts=Number(o.contracts)||0;
+let entry=Number(o.entry)||0;
+let price=Number(o.price)||0;
+let p=(price-entry)*contracts*100;
 pl+=p;
-
-el.options.innerHTML+=`
-<tr>
-<td>${o.ticker}</td>
-<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
-<td><button onclick="deleteItem('options','${o.id}')">X</button></td>
-</tr>`;
+$("optionsTable").innerHTML+=`<tr><td>${o.ticker||"-"}</td><td>${p.toFixed(2)}</td></tr>`;
 });
 
 /* JOURNAL */
-el.journal.innerHTML = `<tr>
-<th>Ticker</th><th>Result</th><th></th></tr>`;
-
-journalData.forEach(j=>{
-el.journal.innerHTML+=`
-<tr>
-<td>${j.ticker}</td>
-<td>${j.result}</td>
-<td><button onclick="deleteItem('journal','${j.id}')">X</button></td>
-</tr>`;
+$("journalTable").innerHTML="<tr><th>Ticker</th><th>Result</th></tr>";
+journal.forEach(j=>{
+$("journalTable").innerHTML+=`<tr><td>${j.ticker||"-"}</td><td>${j.result||"-"}</td></tr>`;
 });
 
 /* STAKING */
-let stakeTotal=0;
-
-el.staking.innerHTML = `<tr>
-<th>Coin</th><th>Rewards</th><th></th></tr>`;
-
-stakingData.forEach(s=>{
-let r=s.amount*(s.apy/100);
-stakeTotal+=r;
-
-el.staking.innerHTML+=`
-<tr>
-<td>${s.coin}</td>
-<td>${r.toFixed(4)}</td>
-<td><button onclick="deleteItem('staking','${s.id}')">X</button></td>
-</tr>`;
+$("stakingTable").innerHTML="<tr><th>Coin</th><th>Rewards</th></tr>";
+staking.forEach(s=>{
+let amt=Number(s.amount)||0;
+let apy=Number(s.apy)||0;
+let r=amt*(apy/100);
+stake+=r;
+$("stakingTable").innerHTML+=`<tr><td>${s.coin||"-"}</td><td>${r.toFixed(4)}</td></tr>`;
 });
 
 /* DASHBOARD */
-let wins = journalData.filter(j=>j.result==="Win").length;
-let winRate = journalData.length ? (wins/journalData.length*100).toFixed(0) : 0;
+$("totalValue").innerText="$"+total.toFixed(2);
+$("totalPL").innerText="$"+pl.toFixed(2);
+$("stakingRewards").innerText=stake.toFixed(4);
 
-el.totalValue.innerText = "$"+total.toFixed(2);
-el.totalPL.innerText = "$"+pl.toFixed(2);
-el.winRate.innerText = winRate+"%";
-el.stakingRewards.innerText = stakeTotal.toFixed(4);
+let wins=journal.filter(j=>j.result==="Win").length;
+$("winRate").innerText=journal.length?Math.round(wins/journal.length*100)+"%":"0%";
 }
 
 /* INIT */
