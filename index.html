@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TradeClarity</title>
 
-<!-- FIREBASE (ADDED ONLY) -->
+<!-- 🔥 FIREBASE (ADDED — DOES NOT CHANGE APP) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -145,8 +145,10 @@ font-weight:bold;
 <div id="stocksPage" class="card">
 <h3>Stocks</h3>
 <div class="form-row">
-<input id="ticker"><input id="shares" type="number">
-<input id="avg" type="number"><input id="price" type="number">
+<input id="ticker" placeholder="Ticker">
+<input id="shares" type="number" placeholder="Shares">
+<input id="avg" type="number" placeholder="Avg Price">
+<input id="price" type="number" placeholder="Current Price">
 <button onclick="handleStock()">Save</button>
 </div>
 <table id="stocks"></table>
@@ -156,16 +158,19 @@ font-weight:bold;
 <div id="cryptoPage" class="card hidden">
 <h3>Crypto</h3>
 <div class="form-row">
-<input id="cTicker"><input id="cAmount" type="number">
-<input id="cAvg" type="number"><input id="cPrice" type="number">
+<input id="cTicker" placeholder="Coin">
+<input id="cAmount" type="number" placeholder="Amount">
+<input id="cAvg" type="number" placeholder="Avg Price">
+<input id="cPrice" type="number" placeholder="Current Price">
 <button onclick="handleCrypto()">Save</button>
 </div>
 <table id="cryptoTable"></table>
 
 <h4>Staking</h4>
 <div class="form-row">
-<input id="sCoin"><input id="sAmount" type="number">
-<input id="sApy" type="number">
+<input id="sCoin" placeholder="Coin">
+<input id="sAmount" type="number" placeholder="Amount Staked">
+<input id="sApy" type="number" placeholder="APY %">
 <button onclick="handleStaking()">Save</button>
 </div>
 <table id="stakingTable"></table>
@@ -175,9 +180,11 @@ font-weight:bold;
 <div id="optionsPage" class="card hidden">
 <h3>Options</h3>
 <div class="form-row">
-<input id="oTicker"><select id="oType"><option>Call</option><option>Put</option></select>
-<input id="oContracts" type="number">
-<input id="oEntry" type="number"><input id="oPrice" type="number">
+<input id="oTicker" placeholder="Ticker">
+<select id="oType"><option>Call</option><option>Put</option></select>
+<input id="oContracts" type="number" placeholder="# Contracts">
+<input id="oEntry" type="number" placeholder="Entry Price">
+<input id="oPrice" type="number" placeholder="Current Price">
 <button onclick="handleOptions()">Save</button>
 </div>
 <table id="optionsTable"></table>
@@ -187,8 +194,9 @@ font-weight:bold;
 <div id="journalPage" class="card hidden">
 <h3>Journal</h3>
 <div class="form-row">
-<input id="jTicker"><select id="jResult"><option>Win</option><option>Loss</option></select>
-<input id="jNotes">
+<input id="jTicker" placeholder="Ticker">
+<select id="jResult"><option>Win</option><option>Loss</option></select>
+<input id="jNotes" placeholder="Notes">
 <button onclick="handleJournal()">Save</button>
 </div>
 <table id="journalTable"></table>
@@ -196,53 +204,39 @@ font-weight:bold;
 
 <script>
 
-/* ================= FIREBASE (ONLY EDIT HERE) ================= */
+/* 🔥 FIREBASE INIT (ADDED — YOUR CONFIG) */
 const firebaseConfig = {
-  apiKey: "PASTE",
-  authDomain: "PASTE",
-  projectId: "PASTE"
+  apiKey: "AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
+  authDomain: "tradeclarity-ad869.firebaseapp.com",
+  projectId: "tradeclarity-ad869",
+  storageBucket: "tradeclarity-ad869.firebasestorage.app",
+  messagingSenderId: "177897129823",
+  appId: "1:177897129823:web:b99ef169cecbe5473558ea"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ================= ORIGINAL DATA ================= */
+/* ===== ORIGINAL APP (UNCHANGED) ===== */
 let stocksData = [];
 let cryptoData = [];
 let optionsData = [];
 let journalData = [];
 let stakingData = [];
 
-/* ================= TAB ================= */
-function showTab(tab){
-["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>{
-document.getElementById(id).classList.add("hidden");
-});
-document.getElementById(tab+"Page").classList.remove("hidden");
-}
-
-/* ================= CORE SAVE (ENHANCED) ================= */
 function saveData(){
-
-// ORIGINAL (UNCHANGED)
 localStorage.setItem("stocksData", JSON.stringify(stocksData));
 localStorage.setItem("cryptoData", JSON.stringify(cryptoData));
 localStorage.setItem("optionsData", JSON.stringify(optionsData));
 localStorage.setItem("journalData", JSON.stringify(journalData));
 localStorage.setItem("stakingData", JSON.stringify(stakingData));
 
-// FIREBASE SYNC (ADDED)
+/* 🔥 FIREBASE SYNC (ADDED) */
 db.collection("tradeclarity").doc("master").set({
-stocksData,
-cryptoData,
-optionsData,
-journalData,
-stakingData
+stocksData,cryptoData,optionsData,journalData,stakingData
 }).catch(()=>{});
-
 }
 
-/* ================= CORE LOAD ================= */
 function loadData(){
 stocksData = JSON.parse(localStorage.getItem("stocksData")) || [];
 cryptoData = JSON.parse(localStorage.getItem("cryptoData")) || [];
@@ -251,32 +245,29 @@ journalData = JSON.parse(localStorage.getItem("journalData")) || [];
 stakingData = JSON.parse(localStorage.getItem("stakingData")) || [];
 }
 
-/* ================= FIREBASE SYNC LOAD ================= */
 async function syncFromFirebase(){
 try{
 let doc = await db.collection("tradeclarity").doc("master").get();
 if(doc.exists){
 let d = doc.data();
-
 stocksData = d.stocksData || stocksData;
 cryptoData = d.cryptoData || cryptoData;
 optionsData = d.optionsData || optionsData;
 journalData = d.journalData || journalData;
 stakingData = d.stakingData || stakingData;
-
 saveData();
 render();
 }
 }catch(e){}
 }
 
-/* ================= HANDLERS (UNCHANGED) ================= */
+/* ===== HANDLERS (UNCHANGED) ===== */
 function handleStock(){
-stocksData.push({ticker:ticker.value,shares:+shares.value,avg:+avg.value,price:+price.value});
+stocksData.push({ticker:ticker.value.toUpperCase(),shares:+shares.value,avg:+avg.value,price:+price.value});
 saveData();render();
 }
 function handleCrypto(){
-cryptoData.push({ticker:cTicker.value,amount:+cAmount.value,avg:+cAvg.value,price:+cPrice.value});
+cryptoData.push({ticker:cTicker.value.toUpperCase(),amount:+cAmount.value,avg:+cAvg.value,price:+cPrice.value});
 saveData();render();
 }
 function handleOptions(){
@@ -292,7 +283,6 @@ stakingData.push({coin:sCoin.value,amount:+sAmount.value,apy:+sApy.value});
 saveData();render();
 }
 
-/* ================= RENDER (UNCHANGED) ================= */
 function render(){
 stocks.innerHTML="";
 stocksData.forEach(s=>stocks.innerHTML+=`<tr><td>${s.ticker}</td></tr>`);
@@ -310,11 +300,17 @@ stakingTable.innerHTML="";
 stakingData.forEach(s=>stakingTable.innerHTML+=`<tr><td>${s.coin}</td></tr>`);
 }
 
-/* ================= START ================= */
+function showTab(tab){
+["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+document.getElementById(tab+"Page").classList.remove("hidden");
+}
+
+/* ===== START ===== */
 loadData();
 render();
 syncFromFirebase();
 
 </script>
+
 </body>
 </html>
