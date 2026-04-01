@@ -190,7 +190,8 @@ font-weight:bold;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc }
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
+onSnapshot
+  
 const app = initializeApp({
 apiKey:"AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
 authDomain:"tradeclarity-ad869.firebaseapp.com",
@@ -225,16 +226,24 @@ stocksData,cryptoData,optionsData,journalData,stakingData
 }
 
 /* ===== LOAD ===== */
-async function loadData(){
-const snap=await getDoc(doc(db,"app","data"));
-if(snap.exists()){
-let d=snap.data();
-stocksData=d.stocksData||[];
-cryptoData=d.cryptoData||[];
-optionsData=d.optionsData||[];
-journalData=d.journalData||[];
-stakingData=d.stakingData||[];
-}
+function startRealtimeSync(){
+
+  onSnapshot(doc(db,"app","data"), (snap)=>{
+
+    if(snap.exists()){
+      let d = snap.data();
+
+      stocksData = d.stocksData || [];
+      cryptoData = d.cryptoData || [];
+      optionsData = d.optionsData || [];
+      journalData = d.journalData || [];
+      stakingData = d.stakingData || [];
+    }
+
+    render();
+
+  });
+
 }
 
 /* ===== HANDLERS ===== */
@@ -311,7 +320,8 @@ winRateEl.innerText=journalData.length?Math.round(wins/journalData.length*100)+"
 
 /* ===== INIT ===== */
 (async()=>{await loadData();render();})();
-
+startRealtimeSync();
+  
 </script>
 
 </body>
