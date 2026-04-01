@@ -226,6 +226,21 @@ stocksData,cryptoData,optionsData,journalData,stakingData
 }
 
 /* ===== LOAD ===== */
+async function loadData(){
+
+  const snap = await getDoc(doc(db,"app","data"));
+
+  if(snap.exists()){
+    let d = snap.data();
+    stocksData = d.stocksData || [];
+    cryptoData = d.cryptoData || [];
+    optionsData = d.optionsData || [];
+    journalData = d.journalData || [];
+    stakingData = d.stakingData || [];
+  }
+
+}  
+  
 function startRealtimeSync(){
 
   onSnapshot(doc(db,"app","data"), (snap)=>{
