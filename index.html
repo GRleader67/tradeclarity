@@ -276,7 +276,7 @@ if(page==="cryptoPage" && document.activeElement.id==="sCoin") handleStaking();
 });
 
 /* ===== STOCKS MODULE ===== */
-function handleStock(){
+async function handleStock(){
 
 const data = {
   ticker: ticker.value.toUpperCase(),
@@ -285,13 +285,19 @@ const data = {
   price: +price.value
 };
 
-addDoc(collection(window.db, "stocks"), {
-  ticker: data.ticker,
-  shares: data.shares,
-  avg: data.avg,
-  price: data.price,
-  created: new Date()
-});
+try {
+  await addDoc(collection(window.db, "stocks"), {
+    ticker: data.ticker,
+    shares: data.shares,
+    avg: data.avg,
+    price: data.price,
+    created: new Date()
+  });
+} catch (err) {
+  console.error("Stock save error:", err);
+  alert("Error saving stock");
+}
+  
 if(appState.mode === "edit"){
 stocksData[appState.editIndex] = data;
 }else{
