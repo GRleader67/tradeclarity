@@ -15,107 +15,21 @@
 --danger:#ef4444;
 --border:#222a33;
 }
-
-body{
-margin:0;
-font-family:Arial;
-background:var(--bg);
-color:var(--text);
-padding:20px;
-}
-
-.tabs{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-}
-
-.tabs button{
-background:#161b22;
-border:1px solid var(--border);
-color:white;
-padding:6px 12px;
-border-radius:6px;
-cursor:pointer;
-}
-
-.tabs button.active{
-background:var(--primary);
-}
-
-.card{
-background:var(--card);
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-}
-
-.form-row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:15px;
-}
-
-input,select{
-padding:8px;
-border-radius:6px;
-border:1px solid var(--border);
-background:#0e131a;
-color:white;
-}
-
-button{
-padding:8px 14px;
-background:var(--primary);
-border:none;
-border-radius:6px;
-color:white;
-cursor:pointer;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid var(--border);
-padding:8px;
-text-align:center;
-}
-
+body{margin:0;font-family:Arial;background:var(--bg);color:var(--text);padding:20px;}
+.tabs{display:flex;gap:10px;margin-bottom:20px;}
+.tabs button{background:#161b22;border:1px solid var(--border);color:white;padding:6px 12px;border-radius:6px;cursor:pointer;}
+.tabs button.active{background:var(--primary);}
+.card{background:var(--card);padding:20px;border-radius:12px;margin-bottom:20px;}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
+input,select{padding:8px;border-radius:6px;border:1px solid var(--border);background:#0e131a;color:white;}
+button{padding:8px 14px;background:var(--primary);border:none;border-radius:6px;color:white;cursor:pointer;}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid var(--border);padding:8px;text-align:center;}
 .green{color:var(--accent)}
 .red{color:var(--danger)}
-
 .hidden{display:none}
-
-.dashboard{
-display:grid;
-grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-gap:15px;
-margin-bottom:20px;
-}
-
-.dash-card{
-background:var(--card);
-padding:15px;
-border-radius:10px;
-text-align:center;
-border:1px solid var(--border);
-}
-
-.dash-card h4{
-margin:0 0 5px 0;
-font-size:14px;
-color:#9aa4af;
-}
-
-.dash-card p{
-margin:0;
-font-size:20px;
-font-weight:bold;
-}
+.dashboard{display:grid;grid-template-columns: repeat(auto-fit, minmax(180px,1fr));gap:15px;margin-bottom:20px;}
+.dash-card{background:var(--card);padding:15px;border-radius:10px;text-align:center;border:1px solid var(--border);}
 </style>
 </head>
 
@@ -138,7 +52,6 @@ font-weight:bold;
 </div>
 
 <div id="stocksPage" class="card">
-<h3>Stocks</h3>
 <div class="form-row">
 <input id="ticker"><input id="shares"><input id="avg"><input id="price">
 <button onclick="handleStock()">Save</button>
@@ -147,7 +60,6 @@ font-weight:bold;
 </div>
 
 <div id="cryptoPage" class="card hidden">
-<h3>Crypto</h3>
 <div class="form-row">
 <input id="cTicker"><input id="cAmount"><input id="cAvg"><input id="cPrice">
 <button onclick="handleCrypto()">Save</button>
@@ -156,7 +68,6 @@ font-weight:bold;
 <table id="cryptoTable"></table>
 
 <h4>Staking</h4>
-
 <div class="form-row">
 <input id="sCoin"><input id="sAmount"><input id="sApy">
 <button onclick="handleStaking()">Save</button>
@@ -166,7 +77,6 @@ font-weight:bold;
 </div>
 
 <div id="optionsPage" class="card hidden">
-<h3>Options</h3>
 <div class="form-row">
 <input id="oTicker"><input id="oContracts"><input id="oEntry"><input id="oPrice">
 <button onclick="handleOptions()">Save</button>
@@ -175,7 +85,6 @@ font-weight:bold;
 </div>
 
 <div id="journalPage" class="card hidden">
-<h3>Journal</h3>
 <div class="form-row">
 <input id="jTicker">
 <select id="jResult"><option>Win</option><option>Loss</option></select>
@@ -188,7 +97,7 @@ font-weight:bold;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc }
+import { getFirestore, doc, setDoc, onSnapshot }
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -196,20 +105,10 @@ apiKey:"AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
 authDomain:"tradeclarity-ad869.firebaseapp.com",
 projectId:"tradeclarity-ad869"
 });
-
 const db = getFirestore(app);
 
-/* ===== DATA ===== */
-let stocksData=[], cryptoData=[], optionsData=[], journalData=[], stakingData=[];
+let stocksData=[],cryptoData=[],optionsData=[],journalData=[],stakingData=[];
 
-const totalValueEl=document.getElementById("totalValue");
-const totalPLEl=document.getElementById("totalPL");
-const winRateEl=document.getElementById("winRate");
-const stakingRewardsEl=document.getElementById("stakingRewards");
-
-let appState={mode:"add",editIndex:null};
-
-/* ===== TAB ===== */
 window.showTab=function(tab){
 ["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>{
 document.getElementById(id).classList.add("hidden");
@@ -217,55 +116,38 @@ document.getElementById(id).classList.add("hidden");
 document.getElementById(tab+"Page").classList.remove("hidden");
 };
 
-/* ===== SAVE ===== */
 async function saveData(){
 await setDoc(doc(db,"app","data"),{
 stocksData,cryptoData,optionsData,journalData,stakingData
 });
 }
 
-/* ===== LOAD ===== */
-async function loadData(){
-const snap=await getDoc(doc(db,"app","data"));
-if(snap.exists()){
-let d=snap.data();
-stocksData=d.stocksData||[];
-cryptoData=d.cryptoData||[];
-optionsData=d.optionsData||[];
-journalData=d.journalData||[];
-stakingData=d.stakingData||[];
-}
-}
-
-/* ===== HANDLERS ===== */
 window.handleStock=async()=>{
 stocksData.push({ticker:ticker.value,shares:+shares.value,avg:+avg.value,price:+price.value});
-await saveData(); render();
+await saveData();
 };
 
 window.handleCrypto=async()=>{
 cryptoData.push({ticker:cTicker.value,amount:+cAmount.value,avg:+cAvg.value,price:+cPrice.value});
-await saveData(); render();
+await saveData();
 };
 
 window.handleOptions=async()=>{
 optionsData.push({ticker:oTicker.value,contracts:+oContracts.value,entry:+oEntry.value,price:+oPrice.value});
-await saveData(); render();
+await saveData();
 };
 
 window.handleJournal=async()=>{
-journalData.push({ticker:jTicker.value,result:jResult.value,notes:jNotes.value});
-await saveData(); render();
+journalData.push({ticker:jTicker.value,result:jResult.value});
+await saveData();
 };
 
 window.handleStaking=async()=>{
 stakingData.push({coin:sCoin.value,amount:+sAmount.value,apy:+sApy.value});
-await saveData(); render();
+await saveData();
 };
 
-/* ===== RENDER ===== */
 function render(){
-
 let total=0,pl=0,stake=0;
 
 stocks.innerHTML="";
@@ -301,16 +183,25 @@ stake+=r;
 stakingTable.innerHTML+=`<tr><td>${s.coin}</td><td>${r.toFixed(4)}</td></tr>`;
 });
 
-totalValueEl.innerText="$"+total.toFixed(2);
-totalPLEl.innerText="$"+pl.toFixed(2);
-stakingRewardsEl.innerText=stake.toFixed(4);
+totalValue.innerText="$"+total.toFixed(2);
+totalPL.innerText="$"+pl.toFixed(2);
+stakingRewards.innerText=stake.toFixed(4);
 
 let wins=journalData.filter(j=>j.result==="Win").length;
-winRateEl.innerText=journalData.length?Math.round(wins/journalData.length*100)+"%":"0%";
+winRate.innerText=journalData.length?Math.round(wins/journalData.length*100)+"%":"0%";
 }
 
-/* ===== INIT ===== */
-(async()=>{await loadData();render();})();
+onSnapshot(doc(db,"app","data"),snap=>{
+if(snap.exists()){
+let d=snap.data();
+stocksData=d.stocksData||[];
+cryptoData=d.cryptoData||[];
+optionsData=d.optionsData||[];
+journalData=d.journalData||[];
+stakingData=d.stakingData||[];
+}
+render();
+});
 
 </script>
 
