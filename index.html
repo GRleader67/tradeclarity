@@ -1,10 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradeClarity</title>
+
+<style>
+:root{
+--bg:#0b0f14;
+--card:#11161d;
+--text:#e6edf3;
+--primary:#3b82f6;
+--accent:#22c55e;
+--danger:#ef4444;
+--border:#222a33;
+}
+
+body{
+margin:0;
+font-family:Arial;
+background:var(--bg);
+color:var(--text);
+padding:20px;
+}
+
+.tabs{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.tabs button{
+background:#161b22;
+border:1px solid var(--border);
+color:white;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.tabs button.active{
+background:var(--primary);
+}
+
+.card{
+background:var(--card);
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+}
+
+.form-row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:15px;
+}
+
+input,select{
+padding:8px;
+border-radius:6px;
+border:1px solid var(--border);
+background:#0e131a;
+color:white;
+}
+
+button{
+padding:8px 14px;
+background:var(--primary);
+border:none;
+border-radius:6px;
+color:white;
+cursor:pointer;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid var(--border);
+padding:8px;
+text-align:center;
+}
+
+.green{color:var(--accent)}
+.red{color:var(--danger)}
+
+.hidden{display:none}
+/* DASHBOARD */
+.dashboard{
+display:grid;
+grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.dash-card{
+background:var(--card);
+padding:15px;
+border-radius:10px;
+text-align:center;
+border:1px solid var(--border);
+}
+
+.dash-card h4{
+margin:0 0 5px 0;
+font-size:14px;
+color:#9aa4af;
+}
+
+.dash-card p{
+margin:0;
+font-size:20px;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>TradeClarity</h2>
+
+<div class="dashboard">
+
+  <div class="dash-card">
+    <h4>Total Value</h4>
+    <p id="totalValue">$0</p>
+  </div>
+
+  <div class="dash-card">
+    <h4>Total P/L</h4>
+    <p id="totalPL">$0</p>
+  </div>
+
+  <div class="dash-card">
+    <h4>Win Rate</h4>
+    <p id="winRate">0%</p>
+  </div>
+
+  <div class="dash-card">
+    <h4>Staking Rewards</h4>
+    <p id="stakingRewards">0</p>
+  </div>
+
+</div>
+
+<div class="tabs">
+<button onclick="showTab('stocks')" id="tab-stocks" class="active">Stocks</button>
+<button onclick="showTab('crypto')" id="tab-crypto">Crypto</button>
+<button onclick="showTab('options')" id="tab-options">Options</button>
+<button onclick="showTab('journal')" id="tab-journal">Journal</button>
+</div>
+
+<!-- STOCKS -->
+<div id="stocksPage" class="card">
+<h3>Stocks</h3>
+
+<div class="form-row">
+<input id="ticker" placeholder="Ticker">
+<input id="shares" type="number" placeholder="Shares">
+<input id="avg" type="number" placeholder="Avg Price">
+<input id="price" type="number" placeholder="Current Price">
+<button onclick="handleStock()">Save</button>
+</div>
+
+<table id="stocks"></table>
+</div>
+
+<!-- CRYPTO -->
+<div id="cryptoPage" class="card hidden">
+<h3>Crypto</h3>
+
+<div class="form-row">
+<input id="cTicker" placeholder="Coin">
+<input id="cAmount" type="number" placeholder="Amount">
+<input id="cAvg" type="number" placeholder="Avg Price">
+<input id="cPrice" type="number" placeholder="Current Price">
+<button onclick="handleCrypto()">Save</button>
+</div>
+
+<table id="cryptoTable"></table>
+
+<h4>Staking</h4>
+
+<div class="form-row">
+<input id="sCoin" placeholder="Coin">
+<input id="sAmount" type="number" placeholder="Amount Staked">
+<input id="sApy" type="number" placeholder="APY %">
+<button onclick="handleStaking()">Save</button>
+</div>
+
+<table id="stakingTable"></table>
+</div>
+
+<!-- OPTIONS -->
+<div id="optionsPage" class="card hidden">
+<h3>Options</h3>
+
+<div class="form-row">
+<input id="oTicker" placeholder="Ticker">
+<select id="oType">
+<option>Call</option>
+<option>Put</option>
+</select>
+<input id="oContracts" type="number" placeholder="# Contracts">
+<input id="oEntry" type="number" placeholder="Entry Price">
+<input id="oPrice" type="number" placeholder="Current Price">
+<button onclick="handleOptions()">Save</button>
+</div>
+
+<table id="optionsTable"></table>
+</div>
+<!-- JOURNAL -->
+<div id="journalPage" class="card hidden">
+<h3>Journal</h3>
+
+<div class="form-row">
+<input id="jTicker" placeholder="Ticker">
+<select id="jResult">
+<option>Win</option>
+<option>Loss</option>
+</select>
+<input id="jNotes" placeholder="Notes">
+<button onclick="handleJournal()">Save</button>
+</div>
+
+<table id="journalTable"></table>
+</div>
+
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-/* FIREBASE INIT */
+/* ================= FIREBASE ================= */
 const firebaseConfig = { 
   apiKey: "AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
   authDomain: "tradeclarity-ad869.firebaseapp.com",
@@ -14,160 +246,187 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===== DATA ===== */
-let stocksData=[], cryptoData=[], optionsData=[], journalData=[], stakingData=[];
+/* ================= DOM ================= */
+const el = {
+  stocks: document.getElementById("stocks"),
+  crypto: document.getElementById("cryptoTable"),
+  options: document.getElementById("optionsTable"),
+  journal: document.getElementById("journalTable"),
+  staking: document.getElementById("stakingTable"),
 
-/* ===== LOAD FROM FIREBASE ===== */
+  totalValue: document.getElementById("totalValue"),
+  totalPL: document.getElementById("totalPL"),
+  winRate: document.getElementById("winRate"),
+  stakingRewards: document.getElementById("stakingRewards"),
+
+  ticker: document.getElementById("ticker"),
+  shares: document.getElementById("shares"),
+  avg: document.getElementById("avg"),
+  price: document.getElementById("price"),
+
+  cTicker: document.getElementById("cTicker"),
+  cAmount: document.getElementById("cAmount"),
+  cAvg: document.getElementById("cAvg"),
+  cPrice: document.getElementById("cPrice"),
+
+  sCoin: document.getElementById("sCoin"),
+  sAmount: document.getElementById("sAmount"),
+  sApy: document.getElementById("sApy"),
+
+  oTicker: document.getElementById("oTicker"),
+  oType: document.getElementById("oType"),
+  oContracts: document.getElementById("oContracts"),
+  oEntry: document.getElementById("oEntry"),
+  oPrice: document.getElementById("oPrice"),
+
+  jTicker: document.getElementById("jTicker"),
+  jResult: document.getElementById("jResult"),
+  jNotes: document.getElementById("jNotes")
+};
+
+/* ================= DATA ================= */
+let stocksData = [];
+let cryptoData = [];
+let optionsData = [];
+let journalData = [];
+let stakingData = [];
+
+/* ================= LOAD ================= */
 async function loadAll(){
-  stocksData = await loadCollection("stocks");
-  cryptoData = await loadCollection("crypto");
-  optionsData = await loadCollection("options");
-  journalData = await loadCollection("journal");
-  stakingData = await loadCollection("staking");
+  stocksData = await load("stocks");
+  cryptoData = await load("crypto");
+  optionsData = await load("options");
+  journalData = await load("journal");
+  stakingData = await load("staking");
   render();
 }
 
-async function loadCollection(name){
+async function load(name){
   const snap = await getDocs(collection(db,name));
   return snap.docs.map(d=>({...d.data(), id:d.id}));
 }
 
-/* ===== SAVE ===== */
-async function saveItem(col,data){
-  const ref = await addDoc(collection(db,col),data);
-  data.id = ref.id;
-  return data;
+/* ================= SAVE ================= */
+async function save(col,data){
+  try{
+    await addDoc(collection(db,col),data);
+    await loadAll();
+  }catch(e){
+    console.error(e);
+    alert("Firebase error — check rules");
+  }
 }
 
-/* ===== DELETE ===== */
-window.deleteItem = async function(col,id){
+/* ================= DELETE ================= */
+window.deleteItem = async (col,id)=>{
   await deleteDoc(doc(db,col,id));
   loadAll();
 };
 
-/* ===== STOCKS ===== */
-window.handleStock = async function(){
-  const data = {
-    ticker: ticker.value.toUpperCase(),
-    shares:+shares.value,
-    avg:+avg.value,
-    price:+price.value
-  };
-  await saveItem("stocks",data);
-  loadAll();
-};
+/* ================= HANDLERS ================= */
+window.handleStock = ()=>save("stocks",{
+  ticker: el.ticker.value.toUpperCase(),
+  shares:+el.shares.value,
+  avg:+el.avg.value,
+  price:+el.price.value
+});
 
-/* ===== CRYPTO ===== */
-window.handleCrypto = async function(){
-  const data = {
-    ticker:cTicker.value.toUpperCase(),
-    amount:+cAmount.value,
-    avg:+cAvg.value,
-    price:+cPrice.value
-  };
-  await saveItem("crypto",data);
-  loadAll();
-};
+window.handleCrypto = ()=>save("crypto",{
+  ticker: el.cTicker.value.toUpperCase(),
+  amount:+el.cAmount.value,
+  avg:+el.cAvg.value,
+  price:+el.cPrice.value
+});
 
-/* ===== OPTIONS ===== */
-window.handleOptions = async function(){
-  const data = {
-    ticker:oTicker.value.toUpperCase(),
-    type:oType.value,
-    contracts:+oContracts.value,
-    entry:+oEntry.value,
-    price:+oPrice.value
-  };
-  await saveItem("options",data);
-  loadAll();
-};
+window.handleOptions = ()=>save("options",{
+  ticker: el.oTicker.value.toUpperCase(),
+  type: el.oType.value,
+  contracts:+el.oContracts.value,
+  entry:+el.oEntry.value,
+  price:+el.oPrice.value
+});
 
-/* ===== JOURNAL ===== */
-window.handleJournal = async function(){
-  const data = {
-    ticker:jTicker.value.toUpperCase(),
-    result:jResult.value,
-    notes:jNotes.value
-  };
-  await saveItem("journal",data);
-  loadAll();
-};
+window.handleJournal = ()=>save("journal",{
+  ticker: el.jTicker.value.toUpperCase(),
+  result: el.jResult.value,
+  notes: el.jNotes.value
+});
 
-/* ===== STAKING ===== */
-window.handleStaking = async function(){
-  const data = {
-    coin:sCoin.value.toUpperCase(),
-    amount:+sAmount.value,
-    apy:+sApy.value
-  };
-  await saveItem("staking",data);
-  loadAll();
-};
+window.handleStaking = ()=>save("staking",{
+  coin: el.sCoin.value.toUpperCase(),
+  amount:+el.sAmount.value,
+  apy:+el.sApy.value
+});
 
-/* ===== RENDER (UPGRADED ANALYTICS) ===== */
+/* ================= RENDER ================= */
 function render(){
 
 /* STOCKS */
-stocks.innerHTML=`<tr>
-<th>Ticker</th><th>Shares</th><th>Value</th><th>P/L</th><th></th>
-</tr>`;
+el.stocks.innerHTML = `<tr>
+<th>Ticker</th><th>Shares</th><th>Value</th><th>P/L</th><th></th></tr>`;
 
-let best=-999999,worst=999999;
+let total=0,pl=0;
 
 stocksData.forEach(s=>{
 let value=s.shares*s.price;
-let pl=(s.price-s.avg)*s.shares;
+let p=(s.price-s.avg)*s.shares;
 
-best=Math.max(best,pl);
-worst=Math.min(worst,pl);
+total+=value; pl+=p;
 
-stocks.innerHTML+=`<tr>
+el.stocks.innerHTML+=`
+<tr>
 <td>${s.ticker}</td>
 <td>${s.shares}</td>
 <td>$${value.toFixed(2)}</td>
-<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
 <td><button onclick="deleteItem('stocks','${s.id}')">X</button></td>
 </tr>`;
 });
 
 /* CRYPTO */
-cryptoTable.innerHTML=`<tr>
-<th>Coin</th><th>Value</th><th>P/L</th><th></th>
-</tr>`;
+el.crypto.innerHTML = `<tr>
+<th>Coin</th><th>Value</th><th>P/L</th><th></th></tr>`;
 
 cryptoData.forEach(c=>{
 let value=c.amount*c.price;
-let pl=(c.price-c.avg)*c.amount;
+let p=(c.price-c.avg)*c.amount;
 
-cryptoTable.innerHTML+=`<tr>
+total+=value; pl+=p;
+
+el.crypto.innerHTML+=`
+<tr>
 <td>${c.ticker}</td>
 <td>$${value.toFixed(2)}</td>
-<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
 <td><button onclick="deleteItem('crypto','${c.id}')">X</button></td>
 </tr>`;
 });
 
 /* OPTIONS */
-optionsTable.innerHTML=`<tr>
-<th>Ticker</th><th>P/L</th><th></th>
-</tr>`;
+el.options.innerHTML = `<tr>
+<th>Ticker</th><th>P/L</th><th></th></tr>`;
 
 optionsData.forEach(o=>{
-let pl=(o.price-o.entry)*o.contracts*100;
-optionsTable.innerHTML+=`<tr>
+let p=(o.price-o.entry)*o.contracts*100;
+
+total+=o.contracts*100*o.price;
+pl+=p;
+
+el.options.innerHTML+=`
+<tr>
 <td>${o.ticker}</td>
-<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td class="${p>=0?'green':'red'}">$${p.toFixed(2)}</td>
 <td><button onclick="deleteItem('options','${o.id}')">X</button></td>
 </tr>`;
 });
 
 /* JOURNAL */
-journalTable.innerHTML=`<tr>
-<th>Ticker</th><th>Result</th><th></th>
-</tr>`;
+el.journal.innerHTML = `<tr>
+<th>Ticker</th><th>Result</th><th></th></tr>`;
 
 journalData.forEach(j=>{
-journalTable.innerHTML+=`<tr>
+el.journal.innerHTML+=`
+<tr>
 <td>${j.ticker}</td>
 <td>${j.result}</td>
 <td><button onclick="deleteItem('journal','${j.id}')">X</button></td>
@@ -175,17 +434,17 @@ journalTable.innerHTML+=`<tr>
 });
 
 /* STAKING */
-stakingTable.innerHTML=`<tr>
-<th>Coin</th><th>Rewards</th><th></th>
-</tr>`;
-
 let stakeTotal=0;
+
+el.staking.innerHTML = `<tr>
+<th>Coin</th><th>Rewards</th><th></th></tr>`;
 
 stakingData.forEach(s=>{
 let r=s.amount*(s.apy/100);
 stakeTotal+=r;
 
-stakingTable.innerHTML+=`<tr>
+el.staking.innerHTML+=`
+<tr>
 <td>${s.coin}</td>
 <td>${r.toFixed(4)}</td>
 <td><button onclick="deleteItem('staking','${s.id}')">X</button></td>
@@ -193,25 +452,19 @@ stakingTable.innerHTML+=`<tr>
 });
 
 /* DASHBOARD */
-let total=0,pl=0;
+let wins = journalData.filter(j=>j.result==="Win").length;
+let winRate = journalData.length ? (wins/journalData.length*100).toFixed(0) : 0;
 
-stocksData.forEach(s=>{total+=s.shares*s.price;pl+=(s.price-s.avg)*s.shares;});
-cryptoData.forEach(c=>{total+=c.amount*c.price;pl+=(c.price-c.avg)*c.amount;});
-
-let wins=journalData.filter(j=>j.result==="Win").length;
-let winRate=journalData.length?((wins/journalData.length)*100).toFixed(0):0;
-
-totalValue.innerText="$"+total.toFixed(2);
-totalPL.innerText="$"+pl.toFixed(2);
-stakingRewards.innerText=stakeTotal.toFixed(4);
-winRateEl.innerText=winRate+"%";
-
-/* PRO ANALYTICS ADD */
-console.log("Best Trade:",best.toFixed(2));
-console.log("Worst Trade:",worst.toFixed(2));
+el.totalValue.innerText = "$"+total.toFixed(2);
+el.totalPL.innerText = "$"+pl.toFixed(2);
+el.winRate.innerText = winRate+"%";
+el.stakingRewards.innerText = stakeTotal.toFixed(4);
 }
 
 /* INIT */
 loadAll();
 
 </script>
+
+</body>
+</html>
