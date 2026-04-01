@@ -1,168 +1,217 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>TradeClarity Pro</title>
-
-<style>
-body{background:#0d1117;color:white;font-family:Arial;padding:20px}
-button,input,select{margin:5px;padding:8px}
-.card{background:#161b22;padding:15px;border-radius:10px;margin-bottom:15px}
-.hidden{display:none}
-.green{color:#2ea043}
-.red{color:#da3633}
-</style>
-</head>
-
-<body>
-
-<h2>TradeClarity Pro</h2>
-
-<!-- DASHBOARD -->
-<div class="card">
-<h3>Dashboard</h3>
-<p>Total Value: <span id="totalValue">$0</span></p>
-<p>Total P/L: <span id="totalPL">$0</span></p>
-<p>Win Rate: <span id="winRate">0%</span></p>
-<p>Best Trade: <span id="bestTrade">0</span></p>
-<p>Worst Trade: <span id="worstTrade">0</span></p>
-</div>
-
-<!-- TABS -->
-<div>
-<button onclick="showTab('stocks')">Stocks</button>
-<button onclick="showTab('crypto')">Crypto</button>
-<button onclick="showTab('staking')">Staking</button>
-<button onclick="showTab('options')">Options</button>
-<button onclick="showTab('journal')">Journal</button>
-</div>
-
-<!-- STOCKS -->
-<div id="stocks" class="card">
-<input id="s_ticker" placeholder="Ticker">
-<input id="s_shares" type="number" placeholder="Shares">
-<input id="s_avg" type="number" placeholder="Avg">
-<input id="s_price" type="number" placeholder="Price">
-<button id="saveStock">Save</button>
-<table id="stocksTable"></table>
-</div>
-
-<!-- CRYPTO -->
-<div id="crypto" class="card hidden">
-<input id="c_coin"><input id="c_amount"><input id="c_avg"><input id="c_price">
-<button id="saveCrypto">Save</button>
-<table id="cryptoTable"></table>
-</div>
-
-<!-- STAKING -->
-<div id="staking" class="card hidden">
-<input id="st_coin"><input id="st_amount"><input id="st_apy">
-<button id="saveStaking">Save</button>
-<table id="stakingTable"></table>
-</div>
-
-<!-- OPTIONS -->
-<div id="options" class="card hidden">
-<input id="o_ticker"><input id="o_contracts"><input id="o_entry"><input id="o_price">
-<button id="saveOptions">Save</button>
-<table id="optionsTable"></table>
-</div>
-
-<!-- JOURNAL -->
-<div id="journal" class="card hidden">
-<input id="j_ticker">
-<select id="j_result"><option>Win</option><option>Loss</option></select>
-<button id="saveJournal">Save</button>
-<table id="journalTable"></table>
-</div>
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs }
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
 from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-/* FIREBASE */
-const app = initializeApp({
-  apiKey:"AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
-  authDomain:"tradeclarity-ad869.firebaseapp.com",
-  projectId:"tradeclarity-ad869"
-});
+/* FIREBASE INIT */
+const firebaseConfig = { 
+  apiKey: "AIzaSyBGxTOJXxuVgke3l_V16bQqubVw7CuHgVE",
+  authDomain: "tradeclarity-ad869.firebaseapp.com",
+  projectId: "tradeclarity-ad869"
+};
+
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* DATA */
-let stocks=[], crypto=[], staking=[], options=[], journal=[];
+/* ===== DATA ===== */
+let stocksData=[], cryptoData=[], optionsData=[], journalData=[], stakingData=[];
 
-/* TAB */
-window.showTab=(t)=>{
-["stocks","crypto","staking","options","journal"]
-.forEach(x=>document.getElementById(x).classList.add("hidden"));
-document.getElementById(t).classList.remove("hidden");
-};
-
-/* SAVE HANDLERS */
-document.getElementById("saveStock").onclick=async()=>{
-try{
-await addDoc(collection(db,"stocks"),{
-ticker:s_ticker.value,shares:+s_shares.value,avg:+s_avg.value,price:+s_price.value
-});
-load();
-}catch(e){alert("Firebase blocked: fix rules");}
-};
-
-document.getElementById("saveCrypto").onclick=async()=>{
-await addDoc(collection(db,"crypto"),{coin:c_coin.value,amount:+c_amount.value,avg:+c_avg.value,price:+c_price.value});load();
-};
-
-document.getElementById("saveStaking").onclick=async()=>{
-await addDoc(collection(db,"staking"),{coin:st_coin.value,amount:+st_amount.value,apy:+st_apy.value});load();
-};
-
-document.getElementById("saveOptions").onclick=async()=>{
-await addDoc(collection(db,"options"),{ticker:o_ticker.value,contracts:+o_contracts.value,entry:+o_entry.value,price:+o_price.value});load();
-};
-
-document.getElementById("saveJournal").onclick=async()=>{
-await addDoc(collection(db,"journal"),{ticker:j_ticker.value,result:j_result.value});load();
-};
-
-/* LOAD */
-async function load(){
-stocks=(await getDocs(collection(db,"stocks"))).docs.map(d=>d.data());
-crypto=(await getDocs(collection(db,"crypto"))).docs.map(d=>d.data());
-staking=(await getDocs(collection(db,"staking"))).docs.map(d=>d.data());
-options=(await getDocs(collection(db,"options"))).docs.map(d=>d.data());
-journal=(await getDocs(collection(db,"journal"))).docs.map(d=>d.data());
-render();
+/* ===== LOAD FROM FIREBASE ===== */
+async function loadAll(){
+  stocksData = await loadCollection("stocks");
+  cryptoData = await loadCollection("crypto");
+  optionsData = await loadCollection("options");
+  journalData = await loadCollection("journal");
+  stakingData = await loadCollection("staking");
+  render();
 }
 
-/* RENDER + ANALYTICS */
+async function loadCollection(name){
+  const snap = await getDocs(collection(db,name));
+  return snap.docs.map(d=>({...d.data(), id:d.id}));
+}
+
+/* ===== SAVE ===== */
+async function saveItem(col,data){
+  const ref = await addDoc(collection(db,col),data);
+  data.id = ref.id;
+  return data;
+}
+
+/* ===== DELETE ===== */
+window.deleteItem = async function(col,id){
+  await deleteDoc(doc(db,col,id));
+  loadAll();
+};
+
+/* ===== STOCKS ===== */
+window.handleStock = async function(){
+  const data = {
+    ticker: ticker.value.toUpperCase(),
+    shares:+shares.value,
+    avg:+avg.value,
+    price:+price.value
+  };
+  await saveItem("stocks",data);
+  loadAll();
+};
+
+/* ===== CRYPTO ===== */
+window.handleCrypto = async function(){
+  const data = {
+    ticker:cTicker.value.toUpperCase(),
+    amount:+cAmount.value,
+    avg:+cAvg.value,
+    price:+cPrice.value
+  };
+  await saveItem("crypto",data);
+  loadAll();
+};
+
+/* ===== OPTIONS ===== */
+window.handleOptions = async function(){
+  const data = {
+    ticker:oTicker.value.toUpperCase(),
+    type:oType.value,
+    contracts:+oContracts.value,
+    entry:+oEntry.value,
+    price:+oPrice.value
+  };
+  await saveItem("options",data);
+  loadAll();
+};
+
+/* ===== JOURNAL ===== */
+window.handleJournal = async function(){
+  const data = {
+    ticker:jTicker.value.toUpperCase(),
+    result:jResult.value,
+    notes:jNotes.value
+  };
+  await saveItem("journal",data);
+  loadAll();
+};
+
+/* ===== STAKING ===== */
+window.handleStaking = async function(){
+  const data = {
+    coin:sCoin.value.toUpperCase(),
+    amount:+sAmount.value,
+    apy:+sApy.value
+  };
+  await saveItem("staking",data);
+  loadAll();
+};
+
+/* ===== RENDER (UPGRADED ANALYTICS) ===== */
 function render(){
 
-let total=0,pl=0,best=-999999,worst=999999;
+/* STOCKS */
+stocks.innerHTML=`<tr>
+<th>Ticker</th><th>Shares</th><th>Value</th><th>P/L</th><th></th>
+</tr>`;
 
-stocksTable.innerHTML="";
-stocks.forEach(s=>{
-let p=(s.price-s.avg)*s.shares;
-total+=s.price*s.shares; pl+=p;
-best=Math.max(best,p); worst=Math.min(worst,p);
-stocksTable.innerHTML+=`<tr><td>${s.ticker}</td><td>${p.toFixed(2)}</td></tr>`;
+let best=-999999,worst=999999;
+
+stocksData.forEach(s=>{
+let value=s.shares*s.price;
+let pl=(s.price-s.avg)*s.shares;
+
+best=Math.max(best,pl);
+worst=Math.min(worst,pl);
+
+stocks.innerHTML+=`<tr>
+<td>${s.ticker}</td>
+<td>${s.shares}</td>
+<td>$${value.toFixed(2)}</td>
+<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td><button onclick="deleteItem('stocks','${s.id}')">X</button></td>
+</tr>`;
 });
 
-/* DASH */
+/* CRYPTO */
+cryptoTable.innerHTML=`<tr>
+<th>Coin</th><th>Value</th><th>P/L</th><th></th>
+</tr>`;
+
+cryptoData.forEach(c=>{
+let value=c.amount*c.price;
+let pl=(c.price-c.avg)*c.amount;
+
+cryptoTable.innerHTML+=`<tr>
+<td>${c.ticker}</td>
+<td>$${value.toFixed(2)}</td>
+<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td><button onclick="deleteItem('crypto','${c.id}')">X</button></td>
+</tr>`;
+});
+
+/* OPTIONS */
+optionsTable.innerHTML=`<tr>
+<th>Ticker</th><th>P/L</th><th></th>
+</tr>`;
+
+optionsData.forEach(o=>{
+let pl=(o.price-o.entry)*o.contracts*100;
+optionsTable.innerHTML+=`<tr>
+<td>${o.ticker}</td>
+<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+<td><button onclick="deleteItem('options','${o.id}')">X</button></td>
+</tr>`;
+});
+
+/* JOURNAL */
+journalTable.innerHTML=`<tr>
+<th>Ticker</th><th>Result</th><th></th>
+</tr>`;
+
+journalData.forEach(j=>{
+journalTable.innerHTML+=`<tr>
+<td>${j.ticker}</td>
+<td>${j.result}</td>
+<td><button onclick="deleteItem('journal','${j.id}')">X</button></td>
+</tr>`;
+});
+
+/* STAKING */
+stakingTable.innerHTML=`<tr>
+<th>Coin</th><th>Rewards</th><th></th>
+</tr>`;
+
+let stakeTotal=0;
+
+stakingData.forEach(s=>{
+let r=s.amount*(s.apy/100);
+stakeTotal+=r;
+
+stakingTable.innerHTML+=`<tr>
+<td>${s.coin}</td>
+<td>${r.toFixed(4)}</td>
+<td><button onclick="deleteItem('staking','${s.id}')">X</button></td>
+</tr>`;
+});
+
+/* DASHBOARD */
+let total=0,pl=0;
+
+stocksData.forEach(s=>{total+=s.shares*s.price;pl+=(s.price-s.avg)*s.shares;});
+cryptoData.forEach(c=>{total+=c.amount*c.price;pl+=(c.price-c.avg)*c.amount;});
+
+let wins=journalData.filter(j=>j.result==="Win").length;
+let winRate=journalData.length?((wins/journalData.length)*100).toFixed(0):0;
+
 totalValue.innerText="$"+total.toFixed(2);
 totalPL.innerText="$"+pl.toFixed(2);
+stakingRewards.innerText=stakeTotal.toFixed(4);
+winRateEl.innerText=winRate+"%";
 
-let wins=journal.filter(j=>j.result==="Win").length;
-winRate.innerText=journal.length?Math.round(wins/journal.length*100)+"%":"0%";
-
-bestTrade.innerText=best.toFixed(2);
-worstTrade.innerText=worst.toFixed(2);
+/* PRO ANALYTICS ADD */
+console.log("Best Trade:",best.toFixed(2));
+console.log("Worst Trade:",worst.toFixed(2));
 }
 
-load();
+/* INIT */
+loadAll();
 
 </script>
-
-</body>
-</html>
