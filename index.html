@@ -513,14 +513,13 @@ amount: +sAmount.value,
 apy: +sApy.value
 };
 
-if(appState.mode === "edit"){
-stakingData[appState.editIndex] = data;
-}else{
+// 🚨 FORCE CLEAN ADD (prevents cross-module corruption)
 stakingData.push(data);
-}
 
+// reset everything safely
 resetStakingForm();
 resetState();
+
 saveData();
 render();
 }
