@@ -90,7 +90,6 @@ text-align:center;
 
 .hidden{display:none}
 
-/* DASHBOARD */
 .dashboard{
 display:grid;
 grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
@@ -232,7 +231,7 @@ font-weight:bold;
 <table id="journalTable"></table>
 </div>
 
-<!-- FIREBASE (ADDED ONLY) -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -248,9 +247,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-</script>
-
-<script>
 
 /* ===== DATA ===== */
 let stocksData = [];
@@ -259,17 +255,13 @@ let optionsData = [];
 let journalData = [];
 let stakingData = [];
 
-const totalValueEl = document.getElementById("totalValue");
-const totalPLEl = document.getElementById("totalPL");
-const winRateEl = document.getElementById("winRate");
-const stakingRewardsEl = document.getElementById("stakingRewards");
-
-/* ===== STATE ===== */
-let appState = {
-mode: "add",
-editIndex: null
-};
-
+/* ===== NEW STATE SYSTEM ===== */
+let stockState = { mode: "add", editIndex: null };
+let cryptoState = { mode: "add", editIndex: null };
+let optionsState = { mode: "add", editIndex: null };
+let journalState = { mode: "add", editIndex: null };
+let stakingState = { mode: "add", editIndex: null };
+  
 /* ===== TAB SYSTEM ===== */
 function showTab(tab){
 ["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>{
@@ -297,7 +289,7 @@ if(page==="cryptoPage" && document.activeElement.id==="sCoin") handleStaking();
 });
 });
 
-/* ===== STOCKS MODULE ===== */
+/* ===== STOCKS ===== */
 function handleStock(){
 
 const data = {
@@ -307,37 +299,36 @@ avg: +avg.value,
 price: +price.value
 };
 
-if(appState.mode === "edit"){
-stocksData[appState.editIndex] = data;
+if(stockState.mode === "edit"){
+stocksData[stockState.editIndex] = data;
 }else{
 stocksData.push(data);
 }
 
+stockState = { mode: "add", editIndex: null };
+
 resetStockForm();
-resetState();
 saveData();
 render();
 }
 
 function startEditStock(i){
 let s = stocksData[i];
+
 ticker.value = s.ticker;
 shares.value = s.shares;
 avg.value = s.avg;
 price.value = s.price;
 
-appState.mode = "edit";
-appState.editIndex = i;
+stockState.mode = "edit";
+stockState.editIndex = i;
 }
 
 function deleteStock(i){
-
 if(!confirm("Are you sure you want to delete this?")) return;
-
 stocksData.splice(i,1);
 saveData();
 render();
-
 }
 
 function resetStockForm(){
@@ -348,7 +339,7 @@ price.value="";
 ticker.focus();
 }
 
-/* ===== CRYPTO MODULE ===== */
+/* ===== CRYPTO ===== */
 function handleCrypto(){
 
 const data = {
@@ -358,37 +349,36 @@ avg: +cAvg.value,
 price: +cPrice.value
 };
 
-if(appState.mode === "edit"){
-cryptoData[appState.editIndex] = data;
+if(cryptoState.mode === "edit"){
+cryptoData[cryptoState.editIndex] = data;
 }else{
 cryptoData.push(data);
 }
 
+cryptoState = { mode: "add", editIndex: null };
+
 resetCryptoForm();
-resetState();
 saveData();
 render();
 }
 
 function startEditCrypto(i){
 let c = cryptoData[i];
+
 cTicker.value = c.ticker;
 cAmount.value = c.amount;
 cAvg.value = c.avg;
 cPrice.value = c.price;
 
-appState.mode = "edit";
-appState.editIndex = i;
+cryptoState.mode = "edit";
+cryptoState.editIndex = i;
 }
 
 function deleteCrypto(i){
-
 if(!confirm("Are you sure you want to delete this?")) return;
-
 cryptoData.splice(i,1);
 saveData();
 render();
-
 }
 
 function resetCryptoForm(){
@@ -399,8 +389,7 @@ cPrice.value="";
 cTicker.focus();
 }
 
-/* ===== OPTIONS MODULE ===== */
-
+/* ===== OPTIONS ===== */
 function handleOptions(){
 
 const data = {
@@ -411,14 +400,15 @@ entry: +oEntry.value,
 price: +oPrice.value
 };
 
-if(appState.mode === "edit"){
-optionsData[appState.editIndex] = data;
+if(optionsState.mode === "edit"){
+optionsData[optionsState.editIndex] = data;
 }else{
 optionsData.push(data);
 }
 
+optionsState = { mode: "add", editIndex: null };
+
 resetOptionsForm();
-resetState();
 saveData();
 render();
 }
@@ -432,18 +422,15 @@ oContracts.value = o.contracts;
 oEntry.value = o.entry;
 oPrice.value = o.price;
 
-appState.mode = "edit";
-appState.editIndex = i;
+optionsState.mode = "edit";
+optionsState.editIndex = i;
 }
 
 function deleteOptions(i){
-
 if(!confirm("Are you sure you want to delete this?")) return;
-
 optionsData.splice(i,1);
 saveData();
 render();
-
 }
 
 function resetOptionsForm(){
@@ -454,8 +441,7 @@ oPrice.value="";
 oTicker.focus();
 }
 
-/* ===== JOURNAL MODULE ===== */
-
+/* ===== JOURNAL ===== */
 function handleJournal(){
 
 const data = {
@@ -464,14 +450,15 @@ result: jResult.value,
 notes: jNotes.value
 };
 
-if(appState.mode === "edit"){
-journalData[appState.editIndex] = data;
+if(journalState.mode === "edit"){
+journalData[journalState.editIndex] = data;
 }else{
 journalData.push(data);
 }
 
+journalState = { mode: "add", editIndex: null };
+
 resetJournalForm();
-resetState();
 saveData();
 render();
 }
@@ -483,18 +470,15 @@ jTicker.value = j.ticker;
 jResult.value = j.result;
 jNotes.value = j.notes;
 
-appState.mode = "edit";
-appState.editIndex = i;
+journalState.mode = "edit";
+journalState.editIndex = i;
 }
 
 function deleteJournal(i){
-
 if(!confirm("Are you sure you want to delete this?")) return;
-
 journalData.splice(i,1);
 saveData();
 render();
-
 }
 
 function resetJournalForm(){
@@ -503,8 +487,7 @@ jNotes.value="";
 jTicker.focus();
 }
 
-/* ===== STAKING MODULE ===== */
-
+/* ===== STAKING ===== */
 function handleStaking(){
 
 const data = {
@@ -513,14 +496,15 @@ amount: +sAmount.value,
 apy: +sApy.value
 };
 
-if(appState.mode === "edit"){
-stakingData[appState.editIndex] = data;
+if(stakingState.mode === "edit"){
+stakingData[stakingState.editIndex] = data;
 }else{
 stakingData.push(data);
 }
 
+stakingState = { mode: "add", editIndex: null };
+
 resetStakingForm();
-resetState();
 saveData();
 render();
 }
@@ -532,18 +516,15 @@ sCoin.value = s.coin;
 sAmount.value = s.amount;
 sApy.value = s.apy;
 
-appState.mode = "edit";
-appState.editIndex = i;
+stakingState.mode = "edit";
+stakingState.editIndex = i;
 }
 
 function deleteStaking(i){
-
 if(!confirm("Are you sure you want to delete this?")) return;
-
 stakingData.splice(i,1);
 saveData();
 render();
-
 }
 
 function resetStakingForm(){
@@ -553,29 +534,15 @@ sApy.value="";
 sCoin.focus();
 }
 
-/* ===== RESET STATE ===== */
-function resetState(){
-appState.mode = "add";
-appState.editIndex = null;
-}
-
-/* ===== SAVE (ONLY CHANGE) ===== */
-function resetState(){
-appState.mode = "add";
-appState.editIndex = null;
-}
-
-/* ===== SAVE DATA ===== */
+/* ===== SAVE ===== */
 function saveData(){
 
-// LOCAL
 localStorage.setItem("stocksData", JSON.stringify(stocksData));
 localStorage.setItem("cryptoData", JSON.stringify(cryptoData));
 localStorage.setItem("optionsData", JSON.stringify(optionsData));
 localStorage.setItem("journalData", JSON.stringify(journalData));
 localStorage.setItem("stakingData", JSON.stringify(stakingData));
 
-// FIREBASE
 db.collection("tradeclarity").doc("main").set({
 stocksData,
 cryptoData,
@@ -588,34 +555,18 @@ console.log("Firebase save failed", e);
 
 }
 
-/* ===== LOAD DATA ===== */
+/* ===== LOAD ===== */
 function loadData(){
-...
+
 stocksData = JSON.parse(localStorage.getItem("stocksData")) || [];
 cryptoData = JSON.parse(localStorage.getItem("cryptoData")) || [];
 optionsData = JSON.parse(localStorage.getItem("optionsData")) || [];
 journalData = JSON.parse(localStorage.getItem("journalData")) || [];
 stakingData = JSON.parse(localStorage.getItem("stakingData")) || [];
 
-try{
-const doc = await db.collection("tradeclarity").doc("main").get();
-
-if(doc.exists){
-let d = doc.data();
-
-stocksData = d.stocksData || stocksData;
-cryptoData = d.cryptoData || cryptoData;
-optionsData = d.optionsData || optionsData;
-journalData = d.journalData || journalData;
-stakingData = d.stakingData || stakingData;
-}
-}catch(e){
-console.log("Firebase load failed");
 }
 
-}
-
-/* ===== RENDER (UNCHANGED) ===== */
+/* ===== RENDER ===== */
 function render(){
 
 /* STOCKS */
@@ -744,6 +695,7 @@ updateDashboard();
 
 }
 
+/* ===== DASHBOARD ===== */
 function updateDashboard(){
 
 let totalValue = 0;
@@ -793,11 +745,10 @@ stakingRewardsEl.innerText = stakingRewards.toFixed(4);
 
 }
 
-/* ===== INIT (ONLY CHANGE) ===== */
-(async()=>{
-await loadData();
+/* ===== INIT ===== */
+loadData();
 render();
-})();
+
 </script>
 
 </body>
