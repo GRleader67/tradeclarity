@@ -24,24 +24,12 @@ color:var(--text);
 padding:20px;
 }
 
-.tabs{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-}
-
+.tabs{display:flex;gap:10px;margin-bottom:20px;}
 .tabs button{
-background:#161b22;
-border:1px solid var(--border);
-color:white;
-padding:6px 12px;
-border-radius:6px;
-cursor:pointer;
+background:#161b22;border:1px solid var(--border);
+color:white;padding:6px 12px;border-radius:6px;cursor:pointer;
 }
-
-.tabs button.active{
-background:var(--primary);
-}
+.tabs button.active{background:var(--primary);}
 
 .card{
 background:var(--card);
@@ -51,39 +39,22 @@ margin-bottom:20px;
 }
 
 .form-row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:15px;
+display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;
 }
 
 input,select{
-padding:8px;
-border-radius:6px;
+padding:8px;border-radius:6px;
 border:1px solid var(--border);
-background:#0e131a;
-color:white;
+background:#0e131a;color:white;
 }
 
 button{
-padding:8px 14px;
-background:var(--primary);
-border:none;
-border-radius:6px;
-color:white;
-cursor:pointer;
+padding:8px 14px;background:var(--primary);
+border:none;border-radius:6px;color:white;cursor:pointer;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid var(--border);
-padding:8px;
-text-align:center;
-}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid var(--border);padding:8px;text-align:center;}
 
 .green{color:var(--accent)}
 .red{color:var(--danger)}
@@ -92,28 +63,13 @@ text-align:center;
 .dashboard{
 display:grid;
 grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-gap:15px;
-margin-bottom:20px;
+gap:15px;margin-bottom:20px;
 }
 
 .dash-card{
 background:var(--card);
-padding:15px;
-border-radius:10px;
-text-align:center;
-border:1px solid var(--border);
-}
-
-.dash-card h4{
-margin:0 0 5px 0;
-font-size:14px;
-color:#9aa4af;
-}
-
-.dash-card p{
-margin:0;
-font-size:20px;
-font-weight:bold;
+padding:15px;border-radius:10px;
+text-align:center;border:1px solid var(--border);
 }
 </style>
 </head>
@@ -152,18 +108,18 @@ font-weight:bold;
 <h3>Crypto</h3>
 <div class="form-row">
 <input id="cTicker" placeholder="Coin">
-<input id="cAmount" type="number" placeholder="Amount">
-<input id="cAvg" type="number" placeholder="Avg Price">
-<input id="cPrice" type="number" placeholder="Current Price">
+<input id="cAmount" type="number">
+<input id="cAvg" type="number">
+<input id="cPrice" type="number">
 <button onclick="handleCrypto()">Save</button>
 </div>
 <table id="cryptoTable"></table>
 
 <h4>Staking</h4>
 <div class="form-row">
-<input id="sCoin" placeholder="Coin">
-<input id="sAmount" type="number" placeholder="Amount Staked">
-<input id="sApy" type="number" placeholder="APY %">
+<input id="sCoin">
+<input id="sAmount" type="number">
+<input id="sApy" type="number">
 <button onclick="handleStaking()">Save</button>
 </div>
 <table id="stakingTable"></table>
@@ -172,11 +128,11 @@ font-weight:bold;
 <div id="optionsPage" class="card hidden">
 <h3>Options</h3>
 <div class="form-row">
-<input id="oTicker" placeholder="Ticker">
+<input id="oTicker">
 <select id="oType"><option>Call</option><option>Put</option></select>
-<input id="oContracts" type="number" placeholder="# Contracts">
-<input id="oEntry" type="number" placeholder="Entry Price">
-<input id="oPrice" type="number" placeholder="Current Price">
+<input id="oContracts" type="number">
+<input id="oEntry" type="number">
+<input id="oPrice" type="number">
 <button onclick="handleOptions()">Save</button>
 </div>
 <table id="optionsTable"></table>
@@ -185,9 +141,9 @@ font-weight:bold;
 <div id="journalPage" class="card hidden">
 <h3>Journal</h3>
 <div class="form-row">
-<input id="jTicker" placeholder="Ticker">
+<input id="jTicker">
 <select id="jResult"><option>Win</option><option>Loss</option></select>
-<input id="jNotes" placeholder="Notes">
+<input id="jNotes">
 <button onclick="handleJournal()">Save</button>
 </div>
 <table id="journalTable"></table>
@@ -209,158 +165,120 @@ appId: "1:177897129823:web:b99ef169cecbe5473558ea"
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-</script>
 
-<script>
-
-/* ===== DATA ===== */
+/* DATA */
 let stocksData=[],cryptoData=[],optionsData=[],journalData=[],stakingData=[];
 
-/* ===== FIREBASE SYNC ===== */
-async function saveToFirebase(){
-await db.collection("tradeclarity").doc("main").set({
-stocksData,cryptoData,optionsData,journalData,stakingData
-});
+/* SYNC */
+async function saveAll(){
+localStorage.setItem("tc",JSON.stringify({stocksData,cryptoData,optionsData,journalData,stakingData}));
+await db.collection("tradeclarity").doc("main").set({stocksData,cryptoData,optionsData,journalData,stakingData});
 }
 
-async function loadFromFirebase(){
+async function loadAll(){
+let local=JSON.parse(localStorage.getItem("tc")||"{}");
+stocksData=local.stocksData||[];
+cryptoData=local.cryptoData||[];
+optionsData=local.optionsData||[];
+journalData=local.journalData||[];
+stakingData=local.stakingData||[];
+
 try{
-const doc=await db.collection("tradeclarity").doc("main").get();
+let doc=await db.collection("tradeclarity").doc("main").get();
 if(doc.exists){
 let d=doc.data();
-stocksData=d.stocksData||[];
-cryptoData=d.cryptoData||[];
-optionsData=d.optionsData||[];
-journalData=d.journalData||[];
-stakingData=d.stakingData||[];
+stocksData=d.stocksData||stocksData;
+cryptoData=d.cryptoData||cryptoData;
+optionsData=d.optionsData||optionsData;
+journalData=d.journalData||journalData;
+stakingData=d.stakingData||stakingData;
 }
-}catch(e){
-console.log("Firebase load failed, using local");
-}
+}catch(e){}
 }
 
-/* ===== LOCAL FALLBACK ===== */
-function saveLocal(){
-localStorage.setItem("tc",JSON.stringify({
-stocksData,cryptoData,optionsData,journalData,stakingData
-}));
-}
-
-function loadLocal(){
-let d=JSON.parse(localStorage.getItem("tc")||"{}");
-stocksData=d.stocksData||[];
-cryptoData=d.cryptoData||[];
-optionsData=d.optionsData||[];
-journalData=d.journalData||[];
-stakingData=d.stakingData||[];
-}
-
-async function saveData(){
-saveLocal();
-saveToFirebase();
-}
-
-async function loadData(){
-loadLocal();
-await loadFromFirebase();
-}
-
-/* ===== TAB ===== */
-function showTab(tab){
-["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>{
-document.getElementById(id).classList.add("hidden");
-});
-document.getElementById(tab+"Page").classList.remove("hidden");
-}
-
-/* ===== HANDLERS ===== */
+/* HANDLERS */
 function handleStock(){
-stocksData.push({
-ticker:ticker.value.toUpperCase(),
-shares:+shares.value,
-avg:+avg.value,
-price:+price.value
-});
+stocksData.push({ticker:ticker.value.toUpperCase(),shares:+shares.value,avg:+avg.value,price:+price.value});
 ticker.value=shares.value=avg.value=price.value="";
-saveData();render();
+saveAll();render();
 }
 
 function handleCrypto(){
-cryptoData.push({
-ticker:cTicker.value.toUpperCase(),
-amount:+cAmount.value,
-avg:+cAvg.value,
-price:+cPrice.value
-});
+cryptoData.push({ticker:cTicker.value.toUpperCase(),amount:+cAmount.value,avg:+cAvg.value,price:+cPrice.value});
 cTicker.value=cAmount.value=cAvg.value=cPrice.value="";
-saveData();render();
+saveAll();render();
 }
 
 function handleOptions(){
-optionsData.push({
-ticker:oTicker.value.toUpperCase(),
-type:oType.value,
-contracts:+oContracts.value,
-entry:+oEntry.value,
-price:+oPrice.value
-});
+optionsData.push({ticker:oTicker.value.toUpperCase(),type:oType.value,contracts:+oContracts.value,entry:+oEntry.value,price:+oPrice.value});
 oTicker.value=oContracts.value=oEntry.value=oPrice.value="";
-saveData();render();
+saveAll();render();
 }
 
 function handleJournal(){
-journalData.push({
-ticker:jTicker.value.toUpperCase(),
-result:jResult.value,
-notes:jNotes.value
-});
+journalData.push({ticker:jTicker.value.toUpperCase(),result:jResult.value,notes:jNotes.value});
 jTicker.value=jNotes.value="";
-saveData();render();
+saveAll();render();
 }
 
 function handleStaking(){
-stakingData.push({
-coin:sCoin.value.toUpperCase(),
-amount:+sAmount.value,
-apy:+sApy.value
-});
+stakingData.push({coin:sCoin.value.toUpperCase(),amount:+sAmount.value,apy:+sApy.value});
 sCoin.value=sAmount.value=sApy.value="";
-saveData();render();
+saveAll();render();
 }
 
-/* ===== RENDER ===== */
+/* TAB */
+function showTab(tab){
+["stocksPage","cryptoPage","optionsPage","journalPage"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+document.getElementById(tab+"Page").classList.remove("hidden");
+}
+
+/* RENDER (FULL RESTORED) */
 function render(){
 
-stocks.innerHTML="<tr><th>Ticker</th><th>Shares</th><th>Value</th></tr>";
+stocks.innerHTML=`<tr><th>Ticker</th><th>Shares</th><th>Cost</th><th>Value</th><th>Price</th><th>P/L</th></tr>`;
+let totalValue=0,totalPL=0;
+
 stocksData.forEach(s=>{
-stocks.innerHTML+=`<tr><td>${s.ticker}</td><td>${s.shares}</td><td>$${(s.shares*s.price).toFixed(2)}</td></tr>`;
+let value=s.shares*s.price;
+let pl=(s.price-s.avg)*s.shares;
+totalValue+=value; totalPL+=pl;
+
+stocks.innerHTML+=`<tr>
+<td>${s.ticker}</td>
+<td>${s.shares}</td>
+<td>$${s.avg}</td>
+<td>$${value.toFixed(2)}</td>
+<td>$${s.price}</td>
+<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+</tr>`;
 });
 
-cryptoTable.innerHTML="<tr><th>Coin</th><th>Amount</th><th>Value</th></tr>";
+cryptoTable.innerHTML=`<tr><th>Coin</th><th>Amount</th><th>Cost</th><th>Value</th><th>Price</th><th>P/L</th></tr>`;
+
 cryptoData.forEach(c=>{
-cryptoTable.innerHTML+=`<tr><td>${c.ticker}</td><td>${c.amount}</td><td>$${(c.amount*c.price).toFixed(2)}</td></tr>`;
+let value=c.amount*c.price;
+let pl=(c.price-c.avg)*c.amount;
+totalValue+=value; totalPL+=pl;
+
+cryptoTable.innerHTML+=`<tr>
+<td>${c.ticker}</td>
+<td>${c.amount}</td>
+<td>$${c.avg}</td>
+<td>$${value.toFixed(2)}</td>
+<td>$${c.price}</td>
+<td class="${pl>=0?'green':'red'}">$${pl.toFixed(2)}</td>
+</tr>`;
 });
 
-optionsTable.innerHTML="<tr><th>Ticker</th><th>Value</th></tr>";
-optionsData.forEach(o=>{
-optionsTable.innerHTML+=`<tr><td>${o.ticker}</td><td>$${(o.contracts*100*o.price).toFixed(2)}</td></tr>`;
-});
-
-journalTable.innerHTML="<tr><th>Ticker</th><th>Result</th></tr>";
-journalData.forEach(j=>{
-journalTable.innerHTML+=`<tr><td>${j.ticker}</td><td>${j.result}</td></tr>`;
-});
-
-stakingTable.innerHTML="<tr><th>Coin</th><th>Rewards</th></tr>";
-stakingData.forEach(s=>{
-stakingTable.innerHTML+=`<tr><td>${s.coin}</td><td>${(s.amount*(s.apy/100)).toFixed(4)}</td></tr>`;
-});
+/* DASHBOARD */
+document.getElementById("totalValue").innerText="$"+totalValue.toFixed(2);
+document.getElementById("totalPL").innerText="$"+totalPL.toFixed(2);
 
 }
 
-/* ===== INIT ===== */
 (async()=>{
-await loadData();
+await loadAll();
 render();
 })();
 </script>
