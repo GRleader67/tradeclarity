@@ -513,13 +513,14 @@ amount: +sAmount.value,
 apy: +sApy.value
 };
 
-// 🚨 FORCE CLEAN ADD (prevents cross-module corruption)
+if(appState.mode === "edit"){
+stakingData[appState.editIndex] = data;
+}else{
 stakingData.push(data);
+}
 
-// reset everything safely
 resetStakingForm();
 resetState();
-
 saveData();
 render();
 }
@@ -558,6 +559,12 @@ appState.mode = "add";
 appState.editIndex = null;
 }
 
+/* ===== SAVE (ONLY CHANGE) ===== */
+function resetState(){
+appState.mode = "add";
+appState.editIndex = null;
+}
+
 /* ===== SAVE DATA ===== */
 function saveData(){
 
@@ -583,7 +590,7 @@ console.log("Firebase save failed", e);
 
 /* ===== LOAD DATA ===== */
 function loadData(){
-
+...
 stocksData = JSON.parse(localStorage.getItem("stocksData")) || [];
 cryptoData = JSON.parse(localStorage.getItem("cryptoData")) || [];
 optionsData = JSON.parse(localStorage.getItem("optionsData")) || [];
